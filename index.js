@@ -29,7 +29,7 @@ class MultiSimplex {
 
 const simplex = new MultiSimplex('lol', 6);
 
-const geometry = (() => {
+/* const geometry = (() => {
 	const s = 32;
 	// const maxManhattanDistance = localVector2D.set(0, 0).manhattanDistanceTo(localVector2D2.set(s/2, s/2));
 	const maxDistance = localVector.set(s/2, s/2, 0).length();
@@ -88,7 +88,7 @@ const geometry = (() => {
 	geometry.setAttribute('barycentric', new THREE.BufferAttribute(barycentrics, 3));
 
 	return geometry;
-})();
+})(); */
 
 const material = new THREE.ShaderMaterial({
   uniforms: {},
@@ -136,10 +136,12 @@ const material = new THREE.ShaderMaterial({
   `,
   side: THREE.DoubleSide,
 });
-const gridMesh = new THREE.Mesh(geometry, material);
-app.object.add(gridMesh);
+const size = new THREE.Vector3(100, 1, 1000);
+const streetMesh = new THREE.Mesh(geometry, material);
+streetMesh.position.set(0, -1/2, 0);
+app.object.add(streetMesh);
 
-const physicsId = physics.addGeometry(gridMesh);
+const physicsId = physics.addBoxGeometry(streetMesh.position, streetMesh.quaternion, size, false);
 /* app.addEventListener('unload', () => {
   physics.removeGeometry(physicsId);
 }); */
