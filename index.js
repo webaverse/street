@@ -137,6 +137,7 @@ const material = new THREE.ShaderMaterial({
   side: THREE.DoubleSide,
 });
 const size = new THREE.Vector3(100, 1, 1000);
+const geometry = new THREE.BoxBufferGeometry(size.x, size.y, size.z);
 const streetMesh = new THREE.Mesh(geometry, material);
 streetMesh.position.set(0, -1/2, 0);
 app.object.add(streetMesh);
