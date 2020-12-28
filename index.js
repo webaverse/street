@@ -53,6 +53,7 @@ class MultiSimplex {
 }
 
 const simplex = new MultiSimplex('lol', 6);
+const simplex2 = new MultiSimplex('lol2', 6);
 
 const streetMesh = (() => {
   const material = new THREE.ShaderMaterial({
@@ -392,12 +393,26 @@ const gridMesh = (() => {
     for (let i = 0; i < topGeometry.attributes.position.array.length; i += 3) {
       const x = topGeometry.attributes.position.array[i];
       const z = topGeometry.attributes.position.array[i+2];
-      // console.log('got simplex', simplex.noise2D(x, y));
-      const d = Math.abs(x); // localVector2D.set(x, z).length();
-      const y = -0.01 + Math.min(Math.max(simplex.noise2D(x/500, z/500) * Math.min(Math.max((d - 5) / 30, 0), 1)**2 * 30, 0), 100);
+      const d = Math.abs(x); 
+      const f = Math.min(Math.max((d - 5) / 30, 0), 1)**2;
+      const y = -0.01 + Math.min(Math.max(simplex.noise2D(x/500, z/500) * f * 30, 0), 100);
       // console.log('got distance', z, d/maxDistance);
       topGeometry.attributes.position.array[i+1] = y;
     }
+    const dynamicPositionYs = new Float32Array(topGeometry.attributes.position.array.length/3);
+    for (let i = 0; i < dynamicPositionYs.length; i += 3) {
+      const x = topGeometry.attributes.position.array[i*3];
+      const z = topGeometry.attributes.position.array[i*3+2];
+
+      // const d = Math.abs(x); 
+      // const f = Math.min(Math.max((d - 5) / 30, 0), 1)**2;
+
+      const y = simplex2.noise2D(x/500, z/500);
+      dynamicPositionYs[i] = y;
+      dynamicPositionYs[i+1] = y;
+      dynamicPositionYs[i+2] = y;
+    }
+    topGeometry.setAttribute('dynamicPositionY', new THREE.BufferAttribute(dynamicPositionYs, 1));
 
     /* const bottomGeometry = new THREE.PlaneBufferGeometry(s, s, s, s);
     const lines = [
@@ -453,23 +468,32 @@ const gridMesh = (() => {
   })();
 
   const material = new THREE.ShaderMaterial({
-    uniforms: {},
+    uniforms: {
+      uBeat: {
+        type: 'f',
+        value: 0,
+      },
+    },
     vertexShader: `\
       #define PI 3.1415926535897932384626433832795
 
       attribute float y;
       attribute vec3 barycentric;
+      attribute float dynamicPositionY;
+      uniform float uBeat;
       varying float vUv;
       varying vec3 vBarycentric;
       varying vec3 vPosition;
+
       void main() {
         vUv = uv.x;
         vBarycentric = barycentric;
         vPosition = position;
-        gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+        gl_Position = projectionMatrix * modelViewMatrix * vec4(position + vec3(0., dynamicPositionY * uBeat, 0.), 1.0);
       }
     `,
     fragmentShader: `\
+      uniform float uBeat;
       precision highp float;
       precision highp int;
 
@@ -496,7 +520,7 @@ const gridMesh = (() => {
         f = min(f, mod(1.-p.x, 1.));
         f = min(f, mod(1.-p.z, 1.));
         f *= 10.;
-        gl_FragColor = vec4(c, /*0.7 + */max(1. - f, 0.));
+        gl_FragColor = vec4(c * (1. - uBeat * 0.5), /*0.7 + */max(1. - f, 0.));
       }
     `,
     side: THREE.DoubleSide,
@@ -698,9 +722,11 @@ renderer.setAnimationLoop(() => {
   if (beat) {
     const beatValue = (now%bpm)/bpm;
     streetMesh.material.uniforms.uBeat.value = beatValue;
+    gridMesh.material.uniforms.uBeat.value = beatValue;
     particlesMesh.material.uniforms.uBeat.value = beatValue;
   } else {
     streetMesh.material.uniforms.uBeat.value = 0;
+    gridMesh.material.uniforms.uBeat.value = 0;
     particlesMesh.material.uniforms.uBeat.value = 0;
   }
   
