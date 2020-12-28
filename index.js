@@ -299,8 +299,8 @@ const gridMesh = (() => {
       const x = topGeometry.attributes.position.array[i];
       const z = topGeometry.attributes.position.array[i+2];
       // console.log('got simplex', simplex.noise2D(x, y));
-      const d = localVector2D.set(x, z).length();
-      const y = simplex.noise2D(x/10, z/10) * (d/10)**0.5;
+      const d = Math.abs(x); // localVector2D.set(x, z).length();
+      const y = Math.min(Math.max(simplex.noise2D(x/500, z/500) * Math.min(d/30, 1)**2 * 30, 0), 100);
       // console.log('got distance', z, d/maxDistance);
       topGeometry.attributes.position.array[i+1] = y;
     }
@@ -335,10 +335,10 @@ const gridMesh = (() => {
     }
     bottomGeometry.applyMatrix4(new THREE.Matrix4().makeRotationFromQuaternion(new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 0, 1), new THREE.Vector3(0, -1, 0)))); */
 
-    let geometry = BufferGeometryUtils.mergeBufferGeometries([
+    let geometry = topGeometry; /* BufferGeometryUtils.mergeBufferGeometries([
       topGeometry,
-      // bottomGeometry,
-    ]);
+      bottomGeometry,
+    ]); */
     geometry = geometry.toNonIndexed();
     const barycentrics = new Float32Array(geometry.attributes.position.array.length);
     let barycentricIndex = 0;
@@ -396,11 +396,12 @@ const gridMesh = (() => {
 
       void main() {
         vec3 c = mix(lineColor1, lineColor2, 2. + vPosition.y);
-        float f = edgeFactor(vBarycentric, 0.5);
-        gl_FragColor = vec4(c, f);
+        float f = edgeFactor(vBarycentric, 1.);
+        gl_FragColor = vec4(c, max(1. - f, 0.));
       }
     `,
     side: THREE.DoubleSide,
+    transparent: true,
   });
   const mesh = new THREE.Mesh(geometry, material);
   return mesh;
