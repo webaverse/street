@@ -490,7 +490,7 @@ const gridMesh = (() => {
         float f = min(mod(p.x, 1.), mod(p.z, 1.));
         f = min(f, mod(1.-p.x, 1.));
         f = min(f, mod(1.-p.z, 1.));
-        f *= 30.;
+        f *= 10.;
         gl_FragColor = vec4(c, /*0.7 + */max(1. - f, 0.));
       }
     `,
@@ -540,7 +540,7 @@ const particlesMesh = (() => {
     geometry.setAttribute('offset', new THREE.BufferAttribute(offset, 3));
     const dynamicPositions = new Float32Array(positions.length);
     for (let i = 0; i < geometry.attributes.position.array.length; i += 9) {
-      localVector.set(Math.random(), Math.random(), Math.random()).subScalar(0.5).multiplyScalar(4);
+      localVector.set(Math.random(), Math.random(), Math.random()).subScalar(0.5).multiplyScalar(5);
       localVector.toArray(dynamicPositions, i);
       localVector.toArray(dynamicPositions, i+3);
       localVector.toArray(dynamicPositions, i+6);
