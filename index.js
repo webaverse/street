@@ -64,7 +64,7 @@ const streetMesh = (() => {
       },
       uBeat: {
         type: 'f',
-        value: 0,
+        value: 1,
       },
     },
     vertexShader: `\
@@ -191,7 +191,7 @@ const streetMesh = (() => {
         vec3 p = mod(vec3(vPosition.x*0.99, vPosition.y, vPosition.z)/10. + 0.5, 1.);
         float section = floor(vPosition.z/10.);
         float f = pattern(p, section);
-        gl_FragColor = vec4(c * (f > 0.5 ? 1. : 0.2) * (1. - uBeat * 0.5), 1.);
+        gl_FragColor = vec4(c * (f > 0.5 ? 1. : 0.2) * uBeat, 1.);
       }
     `,
     side: THREE.DoubleSide,
@@ -407,7 +407,7 @@ const gridMesh = (() => {
       // const d = Math.abs(x); 
       // const f = Math.min(Math.max((d - 5) / 30, 0), 1)**2;
 
-      const y = simplex2.noise2D(x/500, z/500);
+      const y = simplex2.noise2D(x/500, z/500) * 3;
       dynamicPositionYs[i] = y;
       dynamicPositionYs[i+1] = y;
       dynamicPositionYs[i+2] = y;
@@ -471,6 +471,10 @@ const gridMesh = (() => {
     uniforms: {
       uBeat: {
         type: 'f',
+        value: 1,
+      },
+      uBeat2: {
+        type: 'f',
         value: 0,
       },
     },
@@ -480,7 +484,7 @@ const gridMesh = (() => {
       attribute float y;
       attribute vec3 barycentric;
       attribute float dynamicPositionY;
-      uniform float uBeat;
+      uniform float uBeat2;
       varying float vUv;
       varying vec3 vBarycentric;
       varying vec3 vPosition;
@@ -489,7 +493,7 @@ const gridMesh = (() => {
         vUv = uv.x;
         vBarycentric = barycentric;
         vPosition = position;
-        gl_Position = projectionMatrix * modelViewMatrix * vec4(position + vec3(0., dynamicPositionY * uBeat, 0.), 1.0);
+        gl_Position = projectionMatrix * modelViewMatrix * vec4(position + vec3(0., dynamicPositionY * uBeat2, 0.), 1.0);
       }
     `,
     fragmentShader: `\
@@ -520,7 +524,7 @@ const gridMesh = (() => {
         f = min(f, mod(1.-p.x, 1.));
         f = min(f, mod(1.-p.z, 1.));
         f *= 10.;
-        gl_FragColor = vec4(c * (1. - uBeat * 0.5), /*0.7 + */max(1. - f, 0.));
+        gl_FragColor = vec4(c * uBeat, /*0.7 + */max(1. - f, 0.));
       }
     `,
     side: THREE.DoubleSide,
@@ -603,7 +607,7 @@ const particlesMesh = (() => {
       },
       uBeat: {
         type: 'f',
-        value: 0,
+        value: 1,
       },
       uTime: {
         type: 'f',
@@ -647,7 +651,7 @@ const particlesMesh = (() => {
         // vUv = uv.x;
         vBarycentric = barycentric;
         // vPosition = position;
-        vec3 p = position * (1. - uBeat);
+        vec3 p = position * uBeat;
         vec3 o = offset + dynamicPosition * mod(timeOffset + uTime, 1.);
         o -= cameraPosition;
         o = mod(o, ${spread.toFixed(8)});
@@ -699,9 +703,33 @@ const physicsId = physics.addBoxGeometry(streetMesh.position, streetMesh.quatern
 }); */
 
 let beat = false;
+let sound, analyser;
+let beatReady = false;
+{
+  const listener = new THREE.AudioListener();
+  app.object.add(listener);
+  sound = new THREE.Audio(listener);
+  // load a sound and set it as the Audio object's buffer
+  const audioLoader = new THREE.AudioLoader();
+  audioLoader.load(`https://avaer.github.io/assets-private/mnleo.mp3`, function( buffer ) {
+    sound.setBuffer(buffer);
+    sound.setLoop(true);
+    // sound.setVolume(0.5);
+    // sound.play();
+    beatReady = true;
+  });
+  // create an AudioAnalyser, passing in the sound and desired fftSize
+  analyser = new THREE.AudioAnalyser(sound, 32);
+  // get the average frequency of the sound
+}
 window.addEventListener('keydown', e => {
-  if (e.which === 77) { // M
+  if (e.which === 77 && beatReady) { // M
     beat = !beat;
+    if (beat) {
+      sound.play();
+    } else {
+      sound.pause();
+    }
   }
 });
 
@@ -720,14 +748,19 @@ renderer.setAnimationLoop(() => {
   particlesMesh.material.uniforms.uTime.value = (now%10000)/10000;
 
   if (beat) {
-    const beatValue = (now%bpm)/bpm;
+    const fd = analyser.getFrequencyData();
+    const v = fd[4];
+    const beatValue = Math.min(v/255, 1);
+    const beatValue2 = Math.min(v/255, 1);
     streetMesh.material.uniforms.uBeat.value = beatValue;
     gridMesh.material.uniforms.uBeat.value = beatValue;
+    gridMesh.material.uniforms.uBeat2.value = beatValue2;
     particlesMesh.material.uniforms.uBeat.value = beatValue;
   } else {
-    streetMesh.material.uniforms.uBeat.value = 0;
-    gridMesh.material.uniforms.uBeat.value = 0;
-    particlesMesh.material.uniforms.uBeat.value = 0;
+    streetMesh.material.uniforms.uBeat.value = 1;
+    gridMesh.material.uniforms.uBeat.value = 1;
+    gridMesh.material.uniforms.uBeat2.value = 0;
+    particlesMesh.material.uniforms.uBeat.value = 1;
   }
   
   lastUpdateTime = now;
