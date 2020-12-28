@@ -408,6 +408,141 @@ const gridMesh = (() => {
 })();
 app.object.add(gridMesh);
 
+const particlesMesh = (() => {
+  const numParticles = 1000;
+  const s = 0.1;
+  const spread = 10;
+  const geometry = (() => {
+    const geometry = new THREE.BufferGeometry();
+    const positions = new Float32Array(1000 * 9);
+    for (let i = 0; i < positions.length; i += 9) {
+      localVector.set(Math.random(), Math.random(), Math.random()).subScalar(0.5).multiplyScalar(s).toArray(positions, i);
+      localVector.set(Math.random(), Math.random(), Math.random()).subScalar(0.5).multiplyScalar(s).toArray(positions, i+3);
+      localVector.set(Math.random(), Math.random(), Math.random()).subScalar(0.5).multiplyScalar(s).toArray(positions, i+6);
+    }
+    geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+    const barycentrics = new Float32Array(positions.length);
+    let barycentricIndex = 0;
+    for (let i = 0; i < geometry.attributes.position.array.length; i += 9) {
+      barycentrics[barycentricIndex++] = 1;
+      barycentrics[barycentricIndex++] = 0;
+      barycentrics[barycentricIndex++] = 0;
+      barycentrics[barycentricIndex++] = 0;
+      barycentrics[barycentricIndex++] = 1;
+      barycentrics[barycentricIndex++] = 0;
+      barycentrics[barycentricIndex++] = 0;
+      barycentrics[barycentricIndex++] = 0;
+      barycentrics[barycentricIndex++] = 1;
+    }
+    geometry.setAttribute('barycentric', new THREE.BufferAttribute(barycentrics, 3));
+    const offset = new Float32Array(positions.length);
+    for (let i = 0; i < geometry.attributes.position.array.length; i += 9) {
+      localVector.set(Math.random(), Math.random(), Math.random()).subScalar(0.5).multiplyScalar(2);
+      localVector.toArray(offset, i);
+      localVector.toArray(offset, i+3);
+      localVector.toArray(offset, i+6);
+    }
+    geometry.setAttribute('offset', new THREE.BufferAttribute(offset, 3));
+    const dynamicPositions = new Float32Array(positions.length);
+    for (let i = 0; i < geometry.attributes.position.array.length; i += 9) {
+      localVector.set(Math.random(), Math.random(), Math.random()).subScalar(0.5).multiplyScalar(spread);
+      localVector.toArray(dynamicPositions, i);
+      localVector.toArray(dynamicPositions, i+3);
+      localVector.toArray(dynamicPositions, i+6);
+    }
+    geometry.setAttribute('dynamicPosition', new THREE.BufferAttribute(dynamicPositions, 3));
+    const dynamicRotations = new Float32Array(positions.length);
+    for (let i = 0; i < geometry.attributes.position.array.length; i += 9) {
+      localVector.set(Math.random(), Math.random(), Math.random()).subScalar(0.5).normalize();
+      localVector.toArray(dynamicRotations, i);
+      localVector.toArray(dynamicRotations, i+3);
+      localVector.toArray(dynamicRotations, i+6);
+    }
+    geometry.setAttribute('dynamicRotation', new THREE.BufferAttribute(dynamicRotations, 3));
+
+    return geometry;
+  })();
+
+  const material = new THREE.ShaderMaterial({
+    uniforms: {
+      uTime: {
+        type: 'f',
+        value: 0,
+      },
+    },
+    vertexShader: `\
+      #define PI 3.1415926535897932384626433832795
+
+      vec3 applyQuaternion(vec3 v, vec4 q) { 
+        return v + 2.0*cross(cross(v, q.xyz ) + q.w*v, q.xyz);
+      }
+      vec4 axisAngleToQuaternion(vec3 axis, float angle) {
+        float half_angle = angle/2.;
+        vec4 q;
+        q.x = axis.x * sin(half_angle);
+        q.y = axis.y * sin(half_angle);
+        q.z = axis.z * sin(half_angle);
+        q.w = cos(half_angle);
+        return q;
+      }
+      vec4 mult(vec4 a, vec4 b) {
+        return a * b;
+      }
+      vec3 applyAxisAngle(vec3 vector, vec3 axis, float angle) {
+        return applyQuaternion(vector, axisAngleToQuaternion(axis, angle));
+      }
+
+      uniform float uTime;
+      // attribute float y;
+      attribute vec3 offset;
+      attribute vec3 barycentric;
+      attribute vec3 dynamicPosition;
+      attribute vec3 dynamicRotation;
+      // varying float vUv;
+      varying vec3 vBarycentric;
+      varying vec3 vPosition;
+      void main() {
+        // vUv = uv.x;
+        vBarycentric = barycentric;
+        vPosition = position;
+        gl_Position = projectionMatrix * modelViewMatrix * vec4(applyAxisAngle(position, dynamicRotation, uTime * PI*2.) + offset + dynamicPosition * uTime, 1.0);
+      }
+    `,
+    fragmentShader: `\
+      precision highp float;
+      precision highp int;
+
+      #define PI 3.1415926535897932384626433832795
+
+      varying vec3 vBarycentric;
+      varying vec3 vPosition;
+
+      // const vec3 lineColor1 = vec3(${new THREE.Color(0x66bb6a).toArray().join(', ')});
+      // const vec3 lineColor2 = vec3(${new THREE.Color(0x9575cd).toArray().join(', ')});
+
+      float edgeFactor(vec3 bary, float width) {
+        // vec3 bary = vec3(vBC.x, vBC.y, 1.0 - vBC.x - vBC.y);
+        vec3 d = fwidth(bary);
+        vec3 a3 = smoothstep(d * (width - 0.5), d * (width + 0.5), bary);
+        return min(min(a3.x, a3.y), a3.z);
+      }
+
+      void main() {
+        // vec3 c = mix(lineColor1, lineColor2, vPosition.y / 10.);
+        float f = edgeFactor(vBarycentric, 1.);
+        gl_FragColor = vec4(vec3(1.), max(1. - f, 0.));
+        // gl_FragColor = vec4(vec3(1.), 1.);
+      }
+    `,
+    side: THREE.DoubleSide,
+    transparent: true,
+  });
+  const mesh = new THREE.Mesh(geometry, material);
+  mesh.frustumCulled = false;
+  return mesh;
+})();
+app.object.add(particlesMesh);
+
 const physicsId = physics.addBoxGeometry(streetMesh.position, streetMesh.quaternion, new THREE.Vector3(streetSize.z, streetSize.y, streetSize.z).multiplyScalar(0.5), false);
 /* app.addEventListener('unload', () => {
   physics.removeGeometry(physicsId);
@@ -418,6 +553,7 @@ renderer.setAnimationLoop(() => {
   const now = Date.now();
 
   floorMesh.material.uniforms.uAnimation.value = (now%2000)/2000;
+  particlesMesh.material.uniforms.uTime.value = (now%2000)/2000;
   
   lastUpdateTime = now;
 });
