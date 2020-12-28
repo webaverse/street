@@ -182,7 +182,7 @@ const streetMesh = (() => {
       void main() {
         // vec3 c = mix(lineColor1, lineColor2, vPosition.y / 10.);
         vec3 c = lineColor1;
-        vec3 p = mod(vPosition/10. + 0.5, 1.);
+        vec3 p = mod(vec3(vPosition.x*0.99, vPosition.y, vPosition.z)/10. + 0.5, 1.);
         float section = floor(vPosition.z/10.);
         float f = pattern(p, section);
         gl_FragColor = vec4(c * (f > 0.5 ? 1. : 0.2), 1.);
