@@ -61,6 +61,10 @@ const streetMesh = (() => {
         type: 'f',
         value: 0,
       },
+      uBeat: {
+        type: 'f',
+        value: 0,
+      },
     },
     vertexShader: `\
       #define PI 3.1415926535897932384626433832795
@@ -78,6 +82,7 @@ const streetMesh = (() => {
       }
     `,
     fragmentShader: `\
+      uniform float uBeat;
       varying vec3 vBarycentric;
       varying vec3 vPosition;
       uniform float uTime;
@@ -185,7 +190,7 @@ const streetMesh = (() => {
         vec3 p = mod(vec3(vPosition.x*0.99, vPosition.y, vPosition.z)/10. + 0.5, 1.);
         float section = floor(vPosition.z/10.);
         float f = pattern(p, section);
-        gl_FragColor = vec4(c * (f > 0.5 ? 1. : 0.2), 1.);
+        gl_FragColor = vec4(c * (f > 0.5 ? 1. : 0.2) * (1. - uBeat * 0.5), 1.);
       }
     `,
     side: THREE.DoubleSide,
@@ -572,6 +577,10 @@ const particlesMesh = (() => {
         type: 'f',
         value: 0,
       },
+      uBeat: {
+        type: 'f',
+        value: 0,
+      },
       uTime: {
         type: 'f',
         value: 0,
@@ -600,6 +609,7 @@ const particlesMesh = (() => {
       }
 
       uniform float uTime;
+      uniform float uBeat;
       // attribute float y;
       attribute vec3 offset;
       attribute vec3 barycentric;
@@ -608,17 +618,18 @@ const particlesMesh = (() => {
       attribute float timeOffset;
       // varying float vUv;
       varying vec3 vBarycentric;
-      varying vec3 vPosition;
+      // varying vec3 vPosition;
       void main() {
         // vUv = uv.x;
         vBarycentric = barycentric;
-        vPosition = position;
+        // vPosition = position;
+        vec3 p = position * (1. - uBeat);
         vec3 o = offset + dynamicPosition * mod(timeOffset + uTime, 1.);
         o -= cameraPosition;
         o = mod(o, ${spread.toFixed(8)});
         o -= ${(spread/2).toFixed(8)};
         o += cameraPosition;
-        gl_Position = projectionMatrix * modelViewMatrix * vec4(applyAxisAngle(position, dynamicRotation, uTime * PI*2.) + o, 1.0);
+        gl_Position = projectionMatrix * modelViewMatrix * vec4(applyAxisAngle(p, dynamicRotation, uTime * PI*2.) + o, 1.0);
       }
     `,
     fragmentShader: `\
@@ -629,7 +640,7 @@ const particlesMesh = (() => {
 
       uniform float uColor;
       varying vec3 vBarycentric;
-      varying vec3 vPosition;
+      // varying vec3 vPosition;
 
       // const vec3 lineColor1 = vec3(${new THREE.Color(0x66bb6a).toArray().join(', ')});
       // const vec3 lineColor2 = vec3(${new THREE.Color(0x9575cd).toArray().join(', ')});
@@ -663,7 +674,15 @@ const physicsId = physics.addBoxGeometry(streetMesh.position, streetMesh.quatern
   physics.removeGeometry(physicsId);
 }); */
 
+let beat = false;
+window.addEventListener('keydown', e => {
+  if (e.which === 77) { // M
+    beat = !beat;
+  }
+});
+
 let lastUpdateTime = Date.now();
+const bpm = 1000*60/130;
 renderer.setAnimationLoop(() => {
   const now = Date.now();
 
@@ -675,6 +694,15 @@ renderer.setAnimationLoop(() => {
   // floorMesh.material.uniforms.uAnimation.value = (now%2000)/2000;
   particlesMesh.material.uniforms.uColor.value = f;
   particlesMesh.material.uniforms.uTime.value = (now%10000)/10000;
+
+  if (beat) {
+    const beatValue = (now%bpm)/bpm;
+    streetMesh.material.uniforms.uBeat.value = beatValue;
+    particlesMesh.material.uniforms.uBeat.value = beatValue;
+  } else {
+    streetMesh.material.uniforms.uBeat.value = 0;
+    particlesMesh.material.uniforms.uBeat.value = 0;
+  }
   
   lastUpdateTime = now;
 });
