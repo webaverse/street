@@ -389,7 +389,7 @@ const gridMesh = (() => {
       const z = topGeometry.attributes.position.array[i+2];
       // console.log('got simplex', simplex.noise2D(x, y));
       const d = Math.abs(x); // localVector2D.set(x, z).length();
-      const y = Math.min(Math.max(simplex.noise2D(x/500, z/500) * Math.min(d/30, 1)**2 * 30, 0), 100);
+      const y = -0.01 + Math.min(Math.max(simplex.noise2D(x/500, z/500) * Math.min(Math.max((d - 5) / 30, 0), 1)**2 * 30, 0), 100);
       // console.log('got distance', z, d/maxDistance);
       topGeometry.attributes.position.array[i+1] = y;
     }
@@ -495,7 +495,7 @@ const gridMesh = (() => {
   const mesh = new THREE.Mesh(geometry, material);
   return mesh;
 })();
-gridMesh.position.set(0, -0.01, 0);
+// gridMesh.position.set(0, -0.01, 0);
 app.object.add(gridMesh);
 
 const particlesMesh = (() => {
@@ -535,7 +535,7 @@ const particlesMesh = (() => {
     geometry.setAttribute('offset', new THREE.BufferAttribute(offset, 3));
     const dynamicPositions = new Float32Array(positions.length);
     for (let i = 0; i < geometry.attributes.position.array.length; i += 9) {
-      localVector.set(Math.random(), Math.random(), Math.random()).subScalar(0.5).multiplyScalar(2);
+      localVector.set(Math.random(), Math.random(), Math.random()).subScalar(0.5).multiplyScalar(4);
       localVector.toArray(dynamicPositions, i);
       localVector.toArray(dynamicPositions, i+3);
       localVector.toArray(dynamicPositions, i+6);
