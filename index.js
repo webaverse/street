@@ -355,7 +355,7 @@ const floorMesh = (() => {
 // floorMesh.position.set(-8, 0, -8);
 app.object.add(floorMesh);
 
-const physicsId = physics.addBoxGeometry(streetMesh.position, streetMesh.quaternion, streetSize.clone().multiplyScalar(0.5), false);
+const physicsId = physics.addBoxGeometry(streetMesh.position, streetMesh.quaternion, new THREE.Vector3(30, streetSize.y, streetSize.z).multiplyScalar(0.5), false);
 /* app.addEventListener('unload', () => {
   physics.removeGeometry(physicsId);
 }); */
