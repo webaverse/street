@@ -607,7 +607,11 @@ const particlesMesh = (() => {
       },
       uBeat: {
         type: 'f',
-        value: 1,
+        value: 0,
+      },
+      uBeat2: {
+        type: 'f',
+        value: 0,
       },
       uTime: {
         type: 'f',
@@ -637,7 +641,7 @@ const particlesMesh = (() => {
       }
 
       uniform float uTime;
-      uniform float uBeat;
+      uniform float uBeat2;
       // attribute float y;
       attribute vec3 offset;
       attribute vec3 barycentric;
@@ -651,7 +655,7 @@ const particlesMesh = (() => {
         // vUv = uv.x;
         vBarycentric = barycentric;
         // vPosition = position;
-        vec3 p = position * uBeat;
+        vec3 p = position * (1. + uBeat2);
         vec3 o = offset + dynamicPosition * mod(timeOffset + uTime, 1.);
         o -= cameraPosition;
         o = mod(o, ${spread.toFixed(8)});
@@ -667,6 +671,7 @@ const particlesMesh = (() => {
       #define PI 3.1415926535897932384626433832795
 
       uniform float uColor;
+      uniform float uBeat;
       varying vec3 vBarycentric;
       // varying vec3 vPosition;
 
@@ -684,7 +689,7 @@ const particlesMesh = (() => {
         // vec3 c = mix(lineColor1, lineColor2, vPosition.y / 10.);
         vec3 c = vec3(uColor);
         float f = edgeFactor(vBarycentric, 1.);
-        gl_FragColor = vec4(c, max(1. - f, 0.));
+        gl_FragColor = vec4(c * uBeat, max(1. - f, 0.));
         // gl_FragColor = vec4(c, 1.);
       }
     `,
@@ -756,11 +761,13 @@ renderer.setAnimationLoop(() => {
     gridMesh.material.uniforms.uBeat.value = beatValue;
     gridMesh.material.uniforms.uBeat2.value = beatValue2;
     particlesMesh.material.uniforms.uBeat.value = beatValue;
+    particlesMesh.material.uniforms.uBeat2.value = beatValue2;
   } else {
     streetMesh.material.uniforms.uBeat.value = 1;
     gridMesh.material.uniforms.uBeat.value = 1;
     gridMesh.material.uniforms.uBeat2.value = 0;
     particlesMesh.material.uniforms.uBeat.value = 1;
+    particlesMesh.material.uniforms.uBeat2.value = 0;
   }
   
   lastUpdateTime = now;
