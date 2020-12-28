@@ -172,8 +172,8 @@ function mod(a, n) {
   return ((a%n)+n)%n;
 }
 const floorMesh = (() => {
-  const numTiles = 16;
-  const numTiles2P1 = 2*numTiles+1;
+  const dims = [16, 500];
+  const dims2P1 = dims.map(n => 2*n+1);
   const planeBufferGeometry = new THREE.PlaneBufferGeometry(1, 1)
     .applyMatrix4(localMatrix.makeScale(0.95, 0.95, 1))
     .applyMatrix4(localMatrix.makeRotationFromQuaternion(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(1, 0, 0), -Math.PI/2)))
@@ -181,13 +181,13 @@ const floorMesh = (() => {
     .toNonIndexed();
   const numCoords = planeBufferGeometry.attributes.position.array.length;
   const numVerts = numCoords/3;
-  const positions = new Float32Array(numCoords*numTiles2P1*numTiles2P1);
-  const centers = new Float32Array(numCoords*numTiles2P1*numTiles2P1);
-  const typesx = new Float32Array(numVerts*numTiles2P1*numTiles2P1);
-  const typesz = new Float32Array(numVerts*numTiles2P1*numTiles2P1);
+  const positions = new Float32Array(numCoords*dims2P1[0]*dims2P1[1]);
+  const centers = new Float32Array(numCoords*dims2P1[0]*dims2P1[1]);
+  const typesx = new Float32Array(numVerts*dims2P1[0]*dims2P1[1]);
+  const typesz = new Float32Array(numVerts*dims2P1[0]*dims2P1[1]);
   let i = 0;
-  for (let x = -numTiles; x <= numTiles; x++) {
-    for (let z = -numTiles; z <= numTiles; z++) {
+  for (let x = -dims[0]; x <= dims[0]; x++) {
+    for (let z = -dims[1]; z <= dims[1]; z++) {
       const newPlaneBufferGeometry = planeBufferGeometry.clone()
         .applyMatrix4(localMatrix.makeTranslation(x, 0, z));
       positions.set(newPlaneBufferGeometry.attributes.position.array, i * newPlaneBufferGeometry.attributes.position.array.length);
@@ -234,7 +234,7 @@ const floorMesh = (() => {
     float range = 1.0;
 
     void main() {
-      float animationRadius = uAnimation * ${numTiles.toFixed(8)};
+      float animationRadius = uAnimation * ${dims[0].toFixed(8)};
       float currentRadius = length(center.xz);
       float radiusDiff = abs(animationRadius - currentRadius);
       float height = max((range - radiusDiff)/range, 0.0);
@@ -246,7 +246,7 @@ const floorMesh = (() => {
       vPosition = position + vec3(0.5, 0.0, 0.5);
       vTypex = typex;
       vTypez = typez;
-      vDepth = gl_Position.z / ${numTiles.toFixed(8)};
+      vDepth = gl_Position.z / 30.0;
     }
   `;
   const floorFsh = `
@@ -270,7 +270,7 @@ const floorMesh = (() => {
       ) {
         c = uSelectedColor;
       } else {
-        c = vec3(0.9);
+        c = vec3(${new THREE.Color(0xEEEEEE).toArray().join(', ')});
         // c = vec3(0.3);
       }
       float add = 0.0;
@@ -301,14 +301,6 @@ const floorMesh = (() => {
             add = 0.2;
           }
         }
-        /* if (
-          vPosition.x >= uCurrentParcel.x &&
-          vPosition.z >= uCurrentParcel.y &&
-          vPosition.x <= uCurrentParcel.z &&
-          vPosition.z <= uCurrentParcel.w
-        ) {
-          add = 0.2;
-        } */
       }
       c += add;
       a = (1.0-vDepth)*0.5;
