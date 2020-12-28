@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import {BufferGeometryUtils} from 'BufferGeometryUtils';
-import {scene, renderer, camera, runtime, world, physics, ui, app, appManager} from 'app';
+import {scene, renderer, camera, runtime, world, physics, ui, rig, app, appManager} from 'app';
 import Simplex from './simplex-noise.js';
 
 const parcelSize = 16;
@@ -568,6 +568,10 @@ const particlesMesh = (() => {
 
   const material = new THREE.ShaderMaterial({
     uniforms: {
+      uColor: {
+        type: 'f',
+        value: 0,
+      },
       uTime: {
         type: 'f',
         value: 0,
@@ -623,6 +627,7 @@ const particlesMesh = (() => {
 
       #define PI 3.1415926535897932384626433832795
 
+      uniform float uColor;
       varying vec3 vBarycentric;
       varying vec3 vPosition;
 
@@ -638,9 +643,9 @@ const particlesMesh = (() => {
 
       void main() {
         // vec3 c = mix(lineColor1, lineColor2, vPosition.y / 10.);
-        vec3 c = vec3(0.5);
+        vec3 c = vec3(uColor);
         float f = edgeFactor(vBarycentric, 1.);
-        gl_FragColor = vec4(vec3(1.), max(1. - f, 0.));
+        gl_FragColor = vec4(c, max(1. - f, 0.));
         // gl_FragColor = vec4(c, 1.);
       }
     `,
@@ -662,8 +667,13 @@ let lastUpdateTime = Date.now();
 renderer.setAnimationLoop(() => {
   const now = Date.now();
 
+  const transforms = rig.getRigTransforms();
+  const {position} = transforms[0];
+  const f = 1 - Math.min(Math.max(-position.z / 30, -0.3), 0.3) / 0.3;
+
   streetMesh.material.uniforms.uTime.value = (now%10000)/20;
   // floorMesh.material.uniforms.uAnimation.value = (now%2000)/2000;
+  particlesMesh.material.uniforms.uColor.value = f;
   particlesMesh.material.uniforms.uTime.value = (now%10000)/10000;
   
   lastUpdateTime = now;
