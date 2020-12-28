@@ -409,9 +409,9 @@ const gridMesh = (() => {
 app.object.add(gridMesh);
 
 const particlesMesh = (() => {
-  const numParticles = 1000;
+  const numParticles = 30000;
   const s = 0.1;
-  const spread = 10;
+  const spread = 20;
   const geometry = (() => {
     const geometry = new THREE.BufferGeometry();
     const positions = new Float32Array(1000 * 9);
@@ -515,7 +515,10 @@ const particlesMesh = (() => {
         vBarycentric = barycentric;
         vPosition = position;
         vec3 o = offset + dynamicPosition * mod(timeOffset + uTime, 1.);
-        // o = mod(o, ${spread.toFixed(8)});
+        o -= cameraPosition;
+        o = mod(o, ${spread.toFixed(8)});
+        o -= ${(spread/2).toFixed(8)};
+        o += cameraPosition;
         gl_Position = projectionMatrix * modelViewMatrix * vec4(applyAxisAngle(position, dynamicRotation, uTime * PI*2.) + o, 1.0);
       }
     `,
@@ -540,9 +543,10 @@ const particlesMesh = (() => {
 
       void main() {
         // vec3 c = mix(lineColor1, lineColor2, vPosition.y / 10.);
+        vec3 c = vec3(0.5);
         float f = edgeFactor(vBarycentric, 1.);
         gl_FragColor = vec4(vec3(1.), max(1. - f, 0.));
-        // gl_FragColor = vec4(vec3(1.), 1.);
+        // gl_FragColor = vec4(c, 1.);
       }
     `,
     side: THREE.DoubleSide,
