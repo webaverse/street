@@ -263,7 +263,7 @@ const floorMesh = (() => {
     float range = 1.0;
 
     void main() {
-      float animationRadius = uAnimation * 20.;
+      float animationRadius = uAnimation * 10.;
       float currentRadius = length(center.xz - cameraPosition.xz);
       float radiusDiff = abs(animationRadius - currentRadius);
       float height = max((range - radiusDiff)/range, 0.0);
@@ -299,10 +299,10 @@ const floorMesh = (() => {
       ) {
         c = uSelectedColor;
       } else { */
-        c = vec3(${new THREE.Color(0xEEEEEE).toArray().join(', ')});
+        c = vec3(${new THREE.Color(0xCCCCCC).toArray().join(', ')});
         // c = vec3(0.3);
       // }
-      float add = 0.0;
+      /* float add = 0.0;
       if (
         vPosition.x >= uHoverParcel.x &&
         vPosition.z >= uHoverParcel.y &&
@@ -331,7 +331,7 @@ const floorMesh = (() => {
           }
         }
       }
-      c += add;
+      c += add; */
       a = (1.0-vDepth)*0.5;
       gl_FragColor = vec4(c, a);
     }
@@ -490,8 +490,8 @@ const gridMesh = (() => {
         float f = min(mod(p.x, 1.), mod(p.z, 1.));
         f = min(f, mod(1.-p.x, 1.));
         f = min(f, mod(1.-p.z, 1.));
-        f *= 50.;
-        gl_FragColor = vec4(c, 0.7 + max(1. - f, 0.));
+        f *= 30.;
+        gl_FragColor = vec4(c, /*0.7 + */max(1. - f, 0.));
       }
     `,
     side: THREE.DoubleSide,
@@ -663,7 +663,7 @@ renderer.setAnimationLoop(() => {
   const now = Date.now();
 
   streetMesh.material.uniforms.uTime.value = (now%10000)/20;
-  floorMesh.material.uniforms.uAnimation.value = (now%2000)/2000;
+  // floorMesh.material.uniforms.uAnimation.value = (now%2000)/2000;
   particlesMesh.material.uniforms.uTime.value = (now%10000)/10000;
   
   lastUpdateTime = now;
