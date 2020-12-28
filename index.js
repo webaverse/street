@@ -437,7 +437,7 @@ const particlesMesh = (() => {
     geometry.setAttribute('barycentric', new THREE.BufferAttribute(barycentrics, 3));
     const offset = new Float32Array(positions.length);
     for (let i = 0; i < geometry.attributes.position.array.length; i += 9) {
-      localVector.set(Math.random(), Math.random(), Math.random()).subScalar(0.5).multiplyScalar(2);
+      localVector.set(Math.random(), Math.random(), Math.random()).subScalar(0.5).multiplyScalar(spread);
       localVector.toArray(offset, i);
       localVector.toArray(offset, i+3);
       localVector.toArray(offset, i+6);
@@ -445,7 +445,7 @@ const particlesMesh = (() => {
     geometry.setAttribute('offset', new THREE.BufferAttribute(offset, 3));
     const dynamicPositions = new Float32Array(positions.length);
     for (let i = 0; i < geometry.attributes.position.array.length; i += 9) {
-      localVector.set(Math.random(), Math.random(), Math.random()).subScalar(0.5).multiplyScalar(spread);
+      localVector.set(Math.random(), Math.random(), Math.random()).subScalar(0.5).multiplyScalar(2);
       localVector.toArray(dynamicPositions, i);
       localVector.toArray(dynamicPositions, i+3);
       localVector.toArray(dynamicPositions, i+6);
@@ -459,6 +459,14 @@ const particlesMesh = (() => {
       localVector.toArray(dynamicRotations, i+6);
     }
     geometry.setAttribute('dynamicRotation', new THREE.BufferAttribute(dynamicRotations, 3));
+    const timeOffset = new Float32Array(positions.length/3);
+    for (let i = 0; i < timeOffset.length; i += 3) {
+      const r = Math.random();
+      timeOffset[i] = r;
+      timeOffset[i+1] = r;
+      timeOffset[i+2] = r;
+    }
+    geometry.setAttribute('timeOffset', new THREE.BufferAttribute(timeOffset, 1));
 
     return geometry;
   })();
@@ -498,6 +506,7 @@ const particlesMesh = (() => {
       attribute vec3 barycentric;
       attribute vec3 dynamicPosition;
       attribute vec3 dynamicRotation;
+      attribute float timeOffset;
       // varying float vUv;
       varying vec3 vBarycentric;
       varying vec3 vPosition;
@@ -505,7 +514,9 @@ const particlesMesh = (() => {
         // vUv = uv.x;
         vBarycentric = barycentric;
         vPosition = position;
-        gl_Position = projectionMatrix * modelViewMatrix * vec4(applyAxisAngle(position, dynamicRotation, uTime * PI*2.) + offset + dynamicPosition * uTime, 1.0);
+        vec3 o = offset + dynamicPosition * mod(timeOffset + uTime, 1.);
+        // o = mod(o, ${spread.toFixed(8)});
+        gl_Position = projectionMatrix * modelViewMatrix * vec4(applyAxisAngle(position, dynamicRotation, uTime * PI*2.) + o, 1.0);
       }
     `,
     fragmentShader: `\
@@ -553,7 +564,7 @@ renderer.setAnimationLoop(() => {
   const now = Date.now();
 
   floorMesh.material.uniforms.uAnimation.value = (now%2000)/2000;
-  particlesMesh.material.uniforms.uTime.value = (now%2000)/2000;
+  particlesMesh.material.uniforms.uTime.value = (now%10000)/10000;
   
   lastUpdateTime = now;
 });
