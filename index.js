@@ -263,8 +263,8 @@ const floorMesh = (() => {
     float range = 1.0;
 
     void main() {
-      float animationRadius = uAnimation * ${dims[0].toFixed(8)};
-      float currentRadius = length(center.xz);
+      float animationRadius = uAnimation * 20.;
+      float currentRadius = length(center.xz - cameraPosition.xz);
       float radiusDiff = abs(animationRadius - currentRadius);
       float height = max((range - radiusDiff)/range, 0.0);
       height = sin(height*PI/2.0);
@@ -291,17 +291,17 @@ const floorMesh = (() => {
     void main() {
       vec3 c;
       float a;
-      if (
+      /* if (
         vPosition.x >= uSelectedParcel.x &&
         vPosition.z >= uSelectedParcel.y &&
         vPosition.x <= uSelectedParcel.z &&
         vPosition.z <= uSelectedParcel.w
       ) {
         c = uSelectedColor;
-      } else {
+      } else { */
         c = vec3(${new THREE.Color(0xEEEEEE).toArray().join(', ')});
         // c = vec3(0.3);
-      }
+      // }
       float add = 0.0;
       if (
         vPosition.x >= uHoverParcel.x &&
