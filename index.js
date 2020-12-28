@@ -24,6 +24,7 @@ const oneVector = new THREE.Vector3(1, 1, 1);
 const localVector = new THREE.Vector3();
 const localVector2 = new THREE.Vector3();
 const localVector3 = new THREE.Vector3();
+const localVector2D = new THREE.Vector2();
 const localQuaternion = new THREE.Quaternion();
 const localEuler = new THREE.Euler();
 const localMatrix = new THREE.Matrix4();
@@ -54,67 +55,6 @@ class MultiSimplex {
 const simplex = new MultiSimplex('lol', 6);
 
 const streetMesh = (() => {
-  /* const geometry = (() => {
-    const s = 32;
-    // const maxManhattanDistance = localVector2D.set(0, 0).manhattanDistanceTo(localVector2D2.set(s/2, s/2));
-    const maxDistance = localVector.set(s/2, s/2, 0).length();
-
-    const topGeometry = new THREE.PlaneBufferGeometry(s, s, s, s)
-      .applyMatrix4(new THREE.Matrix4().makeRotationFromQuaternion(new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 0, 1), new THREE.Vector3(0, 1, 0))));
-
-    const bottomGeometry = new THREE.PlaneBufferGeometry(s, s, s, s);
-    const lines = [
-      new THREE.Line3(new THREE.Vector3(-s/2, -s/2, 0), new THREE.Vector3(-s/2, s/2, 0)),
-      new THREE.Line3(new THREE.Vector3(-s/2, s/2, 0), new THREE.Vector3(s/2, s/2, 0)),
-      new THREE.Line3(new THREE.Vector3(s/2, s/2, 0), new THREE.Vector3(s/2, -s/2, 0)),
-      new THREE.Line3(new THREE.Vector3(s/2, -s/2, 0), new THREE.Vector3(-s/2, -s/2, 0)),
-    ];
-    const _closestDistanceToLine = (x, y) => {
-      localVector.set(x, y, 0);
-      let result = Infinity;
-      for (const line of lines) {
-        const point = line.closestPointToPoint(localVector, true, localVector2);
-        const d = localVector.distanceTo(point);
-        if (d < result) {
-          result = d;
-        }
-      }
-      return result;
-    };
-    for (let i = 0; i < bottomGeometry.attributes.position.array.length; i += 3) {
-      const x = bottomGeometry.attributes.position.array[i];
-      const y = bottomGeometry.attributes.position.array[i+1];
-      // console.log('got simplex', simplex.noise2D(x, y));
-      const d = _closestDistanceToLine(x, y); // localVector2D.set(x, y).manhattanDistanceTo(localVector2D2);
-      const z = (10 + simplex.noise2D(x/100, y/100)) * (d/maxDistance)**0.5;
-      // console.log('got distance', z, d/maxDistance);
-      bottomGeometry.attributes.position.array[i+2] = z;
-    }
-    bottomGeometry.applyMatrix4(new THREE.Matrix4().makeRotationFromQuaternion(new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 0, 1), new THREE.Vector3(0, -1, 0))));
-
-    let geometry = BufferGeometryUtils.mergeBufferGeometries([
-      topGeometry,
-      bottomGeometry,
-    ]);
-    geometry = geometry.toNonIndexed();
-    const barycentrics = new Float32Array(geometry.attributes.position.array.length);
-    let barycentricIndex = 0;
-    for (let i = 0; i < geometry.attributes.position.array.length; i += 9) {
-      barycentrics[barycentricIndex++] = 1;
-      barycentrics[barycentricIndex++] = 0;
-      barycentrics[barycentricIndex++] = 0;
-      barycentrics[barycentricIndex++] = 0;
-      barycentrics[barycentricIndex++] = 1;
-      barycentrics[barycentricIndex++] = 0;
-      barycentrics[barycentricIndex++] = 0;
-      barycentrics[barycentricIndex++] = 0;
-      barycentrics[barycentricIndex++] = 1;
-    }
-    geometry.setAttribute('barycentric', new THREE.BufferAttribute(barycentrics, 3));
-
-    return geometry;
-  })(); */
-
   const material = new THREE.ShaderMaterial({
     uniforms: {},
     vertexShader: `\
@@ -346,6 +286,126 @@ const floorMesh = (() => {
 })();
 // floorMesh.position.set(-8, 0, -8);
 app.object.add(floorMesh);
+
+const gridMesh = (() => {
+  const geometry = (() => {
+    const s = 300;
+    // const maxManhattanDistance = localVector2D.set(0, 0).manhattanDistanceTo(localVector2D2.set(s/2, s/2));
+
+    const topGeometry = new THREE.PlaneBufferGeometry(s, s, s, s)
+      .applyMatrix4(new THREE.Matrix4().makeRotationFromQuaternion(new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 0, 1), new THREE.Vector3(0, 1, 0))));
+
+    for (let i = 0; i < topGeometry.attributes.position.array.length; i += 3) {
+      const x = topGeometry.attributes.position.array[i];
+      const z = topGeometry.attributes.position.array[i+2];
+      // console.log('got simplex', simplex.noise2D(x, y));
+      const d = localVector2D.set(x, z).length();
+      const y = simplex.noise2D(x/10, z/10) * (d/10)**0.5;
+      // console.log('got distance', z, d/maxDistance);
+      topGeometry.attributes.position.array[i+1] = y;
+    }
+
+    /* const bottomGeometry = new THREE.PlaneBufferGeometry(s, s, s, s);
+    const lines = [
+      new THREE.Line3(new THREE.Vector3(-s/2, -s/2, 0), new THREE.Vector3(-s/2, s/2, 0)),
+      new THREE.Line3(new THREE.Vector3(-s/2, s/2, 0), new THREE.Vector3(s/2, s/2, 0)),
+      new THREE.Line3(new THREE.Vector3(s/2, s/2, 0), new THREE.Vector3(s/2, -s/2, 0)),
+      new THREE.Line3(new THREE.Vector3(s/2, -s/2, 0), new THREE.Vector3(-s/2, -s/2, 0)),
+    ];
+    const _closestDistanceToLine = (x, y) => {
+      localVector.set(x, y, 0);
+      let result = Infinity;
+      for (const line of lines) {
+        const point = line.closestPointToPoint(localVector, true, localVector2);
+        const d = localVector.distanceTo(point);
+        if (d < result) {
+          result = d;
+        }
+      }
+      return result;
+    };
+    for (let i = 0; i < bottomGeometry.attributes.position.array.length; i += 3) {
+      const x = bottomGeometry.attributes.position.array[i];
+      const y = bottomGeometry.attributes.position.array[i+1];
+      // console.log('got simplex', simplex.noise2D(x, y));
+      const d = _closestDistanceToLine(x, y); // localVector2D.set(x, y).manhattanDistanceTo(localVector2D2);
+      const z = (10 + simplex.noise2D(x/100, y/100)) * (d/maxDistance)**0.5;
+      // console.log('got distance', z, d/maxDistance);
+      bottomGeometry.attributes.position.array[i+2] = z;
+    }
+    bottomGeometry.applyMatrix4(new THREE.Matrix4().makeRotationFromQuaternion(new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 0, 1), new THREE.Vector3(0, -1, 0)))); */
+
+    let geometry = BufferGeometryUtils.mergeBufferGeometries([
+      topGeometry,
+      // bottomGeometry,
+    ]);
+    geometry = geometry.toNonIndexed();
+    const barycentrics = new Float32Array(geometry.attributes.position.array.length);
+    let barycentricIndex = 0;
+    for (let i = 0; i < geometry.attributes.position.array.length; i += 9) {
+      barycentrics[barycentricIndex++] = 1;
+      barycentrics[barycentricIndex++] = 0;
+      barycentrics[barycentricIndex++] = 0;
+      barycentrics[barycentricIndex++] = 0;
+      barycentrics[barycentricIndex++] = 1;
+      barycentrics[barycentricIndex++] = 0;
+      barycentrics[barycentricIndex++] = 0;
+      barycentrics[barycentricIndex++] = 0;
+      barycentrics[barycentricIndex++] = 1;
+    }
+    geometry.setAttribute('barycentric', new THREE.BufferAttribute(barycentrics, 3));
+
+    return geometry;
+  })();
+
+  const material = new THREE.ShaderMaterial({
+    uniforms: {},
+    vertexShader: `\
+      #define PI 3.1415926535897932384626433832795
+
+      attribute float y;
+      attribute vec3 barycentric;
+      varying float vUv;
+      varying vec3 vBarycentric;
+      varying vec3 vPosition;
+      void main() {
+        vUv = uv.x;
+        vBarycentric = barycentric;
+        vPosition = position;
+        gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+      }
+    `,
+    fragmentShader: `\
+      precision highp float;
+      precision highp int;
+
+      #define PI 3.1415926535897932384626433832795
+
+      varying vec3 vBarycentric;
+      varying vec3 vPosition;
+
+      const vec3 lineColor1 = vec3(${new THREE.Color(0xef5350).toArray().join(', ')});
+      const vec3 lineColor2 = vec3(${new THREE.Color(0xff7043).toArray().join(', ')});
+
+      float edgeFactor(vec3 bary, float width) {
+        // vec3 bary = vec3(vBC.x, vBC.y, 1.0 - vBC.x - vBC.y);
+        vec3 d = fwidth(bary);
+        vec3 a3 = smoothstep(d * (width - 0.5), d * (width + 0.5), bary);
+        return min(min(a3.x, a3.y), a3.z);
+      }
+
+      void main() {
+        vec3 c = mix(lineColor1, lineColor2, 2. + vPosition.y);
+        float f = edgeFactor(vBarycentric, 0.5);
+        gl_FragColor = vec4(c, f);
+      }
+    `,
+    side: THREE.DoubleSide,
+  });
+  const mesh = new THREE.Mesh(geometry, material);
+  return mesh;
+})();
+app.object.add(gridMesh);
 
 const physicsId = physics.addBoxGeometry(streetMesh.position, streetMesh.quaternion, new THREE.Vector3(30, streetSize.y, streetSize.z).multiplyScalar(0.5), false);
 /* app.addEventListener('unload', () => {
