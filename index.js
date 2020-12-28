@@ -384,8 +384,8 @@ const gridMesh = (() => {
       varying vec3 vBarycentric;
       varying vec3 vPosition;
 
-      const vec3 lineColor1 = vec3(${new THREE.Color(0xef5350).toArray().join(', ')});
-      const vec3 lineColor2 = vec3(${new THREE.Color(0xff7043).toArray().join(', ')});
+      const vec3 lineColor1 = vec3(${new THREE.Color(0x66bb6a).toArray().join(', ')});
+      const vec3 lineColor2 = vec3(${new THREE.Color(0x9575cd).toArray().join(', ')});
 
       float edgeFactor(vec3 bary, float width) {
         // vec3 bary = vec3(vBC.x, vBC.y, 1.0 - vBC.x - vBC.y);
@@ -395,7 +395,7 @@ const gridMesh = (() => {
       }
 
       void main() {
-        vec3 c = mix(lineColor1, lineColor2, 2. + vPosition.y);
+        vec3 c = mix(lineColor1, lineColor2, vPosition.y / 10.);
         float f = edgeFactor(vBarycentric, 1.);
         gl_FragColor = vec4(c, max(1. - f, 0.));
       }
