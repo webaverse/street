@@ -56,7 +56,12 @@ const simplex = new MultiSimplex('lol', 6);
 
 const streetMesh = (() => {
   const material = new THREE.ShaderMaterial({
-    uniforms: {},
+    uniforms: {
+      uTime: {
+        type: 'f',
+        value: 0,
+      },
+    },
     vertexShader: `\
       #define PI 3.1415926535897932384626433832795
 
@@ -75,28 +80,112 @@ const streetMesh = (() => {
     fragmentShader: `\
       varying vec3 vBarycentric;
       varying vec3 vPosition;
-    
-      // const float lineWidth = 1.0;
-      const vec3 lineColor1 = vec3(${new THREE.Color(0xef5350).toArray().join(', ')});
-      const vec3 lineColor2 = vec3(${new THREE.Color(0xff7043).toArray().join(', ')});
+      uniform float uTime;
 
-      float gridFactor (vec3 bary, float width, float feather) {
-        float w1 = width - feather * 0.5;
-        // vec3 bary = vec3(vBC.x, vBC.y, 1.0 - vBC.x - vBC.y);
-        vec3 d = fwidth(bary);
-        vec3 a3 = smoothstep(d * w1, d * (w1 + feather), bary);
-        return min(min(a3.x, a3.y), a3.z);
+      struct C{
+          float d;
+          int t;
+      };
+          
+      float rand2(vec2 co){
+          return fract(sin(dot(co.xy ,vec2(12.9898,78.233))) * 43758.5453);
       }
-      float gridFactor (vec3 bary, float width) {
-        // vec3 bary = vec3(vBC.x, vBC.y, 1.0 - vBC.x - vBC.y);
-        vec3 d = fwidth(bary);
-        vec3 a3 = smoothstep(d * (width - 0.5), d * (width + 0.5), bary);
-        return min(min(a3.x, a3.y), a3.z);
+
+      float rand(vec3 v){
+          return rand2(vec2(v.x+v.z,v.y+v.z));
       }
+
+      int wait(float t){
+          float period = 4.*3.141592/1.5;
+          t = mod(t,period);
+          if(t < period/2.){
+              if(t < period/8.)return 0;
+              if(t < period/4.)return 1;
+              return int((t/period-1./4.)*40.)+2;
+          }else{
+              t-=period/2.;
+              if(t < period/8.)return 10;
+              if(t < period/4.)return 9;
+              return 8-int((t/period-1./4.)*40.);
+          }
+          return 0;
+      }
+
+      float scal(float t){
+          float period = 4.*3.141592/1.5;
+          t = mod(t,period);
+          float base = -1000.0;
+          if(t < period/2.){
+              if(t < period/8.)base=-1000.0;
+              else if(t < period/4.)base=period/8.;
+              else if(t<period*(1./4.+9./40.)){
+                  int x = int((t/period-1./4.)*40.);
+                base = period*(1./4.+float(x)/40.);
+              }
+          }else{
+              t -= period/2.;
+              if(t < period/8.)base=-1000.0;
+              else if(t < period/4.)base=period/8.;
+              else if(t<period*(1./4.+9./40.)){
+                  int x = int((t/period-1./4.)*40.);
+                base = period*(1./4.+float(x)/40.);
+              }
+          }
+          return exp(-(t-base)*10.);
+      }
+
+      vec3 transform(vec3 p){
+          float t = uTime+sin(uTime*1.5);
+          p -= vec3(4,0,0);
+          p *= mat3(cos(t),0,sin(t),0,1,0,-sin(t),0,cos(t));
+          t *= 1.2;
+          t += sin(uTime*0.5);
+          p *= mat3(cos(t),sin(t),0,-sin(t),cos(t),0,0,0,1);
+          return p;
+      }
+
+      float pattern(vec3 p, float section) {
+        // p = transform(p);
+        /* float s = 1.; // (0.7+scal(uTime)*0.08) / 0.7;
+        p /= s;
+        p /= 1.3;
+        p += 0.5; */
+        float d = 0.;
+        // float t = uTime;
+        vec3 e = vec3(section);
+        for(int i=0;i<10;i++){
+            // if(wait(t) <= i)break;
+            float w = pow(2.,float(i));
+            float f;
+
+            f = rand(vec3(0,0,float(i))+e);
+            if(p.x < f)e.x+=w;
+            else e.x-=w;
+            if(pow(max(0.,1.-abs(p.x-f)),90.)*1.5 > 0.5+float(i)/20.)d = 1.;
+
+            f = rand(vec3(1,0,float(i))+e);
+            if(p.y < f)e.y+=w;
+            else e.y-=w;
+            if(pow(max(0.,1.-abs(p.y-f)),90.)*1.5 > 0.5+float(i)/20.)d = 1.;
+
+            f = rand(vec3(2,0,float(i))+e);
+            if(p.z < f)e.z+=w;
+            else e.z-=w;
+            if(pow(max(0.,1.-abs(p.z-f)),90.)*1.5 > 0.5+float(i)/20.)d = 1.;
+        }
+        return d<1.?0.:1.;
+      }
+
+      const vec3 lineColor1 = vec3(${new THREE.Color(0x4fc3f7).toArray().join(', ')});
+      // const vec3 lineColor2 = vec3(${new THREE.Color(0x9575cd).toArray().join(', ')});
 
       void main() {
-        vec3 c = mix(lineColor1, lineColor2, 2. + vPosition.y);
-        gl_FragColor = vec4(c * (gridFactor(vBarycentric, 0.5) < 0.5 ? 0.9 : 1.0), 1.0);
+        // vec3 c = mix(lineColor1, lineColor2, vPosition.y / 10.);
+        vec3 c = lineColor1;
+        vec3 p = mod(vPosition/10. + 0.5, 1.);
+        float section = floor(vPosition.z/10.);
+        float f = pattern(p, section);
+        gl_FragColor = vec4(c * (f > 0.5 ? 1. : 0.2), 1.);
       }
     `,
     side: THREE.DoubleSide,
@@ -284,7 +373,7 @@ const floorMesh = (() => {
   // mesh.receiveShadow = true;
   return mesh;
 })();
-// floorMesh.position.set(-8, 0, -8);
+floorMesh.position.set(0, -0.02, 0);
 app.object.add(floorMesh);
 
 const gridMesh = (() => {
@@ -406,6 +495,7 @@ const gridMesh = (() => {
   const mesh = new THREE.Mesh(geometry, material);
   return mesh;
 })();
+gridMesh.position.set(0, -0.01, 0);
 app.object.add(gridMesh);
 
 const particlesMesh = (() => {
@@ -567,6 +657,7 @@ let lastUpdateTime = Date.now();
 renderer.setAnimationLoop(() => {
   const now = Date.now();
 
+  streetMesh.material.uniforms.uTime.value = (now%10000)/20;
   floorMesh.material.uniforms.uAnimation.value = (now%2000)/2000;
   particlesMesh.material.uniforms.uTime.value = (now%10000)/10000;
   
