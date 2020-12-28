@@ -485,8 +485,13 @@ const gridMesh = (() => {
 
       void main() {
         vec3 c = mix(lineColor1, lineColor2, vPosition.y / 10.);
-        float f = edgeFactor(vBarycentric, 1.);
-        gl_FragColor = vec4(c, max(1. - f, 0.));
+        // vec3 p = fwidth(vPosition);
+        vec3 p = vPosition;
+        float f = min(mod(p.x, 1.), mod(p.z, 1.));
+        f = min(f, mod(1.-p.x, 1.));
+        f = min(f, mod(1.-p.z, 1.));
+        f *= 50.;
+        gl_FragColor = vec4(c, 0.7 + max(1. - f, 0.));
       }
     `,
     side: THREE.DoubleSide,
