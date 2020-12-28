@@ -201,7 +201,7 @@ function mod(a, n) {
   return ((a%n)+n)%n;
 }
 const floorMesh = (() => {
-  const dims = [16, 500];
+  const dims = [100, 500];
   const dims2P1 = dims.map(n => 2*n+1);
   const planeBufferGeometry = new THREE.PlaneBufferGeometry(1, 1)
     .applyMatrix4(localMatrix.makeScale(0.95, 0.95, 1))
