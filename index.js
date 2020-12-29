@@ -708,25 +708,18 @@ const physicsId = physics.addBoxGeometry(streetMesh.position, streetMesh.quatern
 }); */
 
 let beat = false;
-let sound, analyser;
 let beatReady = false;
-{
-  const listener = new THREE.AudioListener();
-  app.object.add(listener);
-  sound = new THREE.Audio(listener);
-  // load a sound and set it as the Audio object's buffer
-  const audioLoader = new THREE.AudioLoader();
-  audioLoader.load(`https://avaer.github.io/assets-private/mnleo.mp3`, function( buffer ) {
-    sound.setBuffer(buffer);
-    sound.setLoop(true);
-    // sound.setVolume(0.5);
-    // sound.play();
-    beatReady = true;
-  });
-  // create an AudioAnalyser, passing in the sound and desired fftSize
-  analyser = new THREE.AudioAnalyser(sound, 32);
-  // get the average frequency of the sound
-}
+const listener = new THREE.AudioListener();
+app.object.add(listener);
+const sound = new THREE.Audio(listener);
+new THREE.AudioLoader().load(`https://avaer.github.io/assets-private/mnleo.mp3`, function( buffer ) {
+  sound.setBuffer(buffer);
+  sound.setLoop(true);
+  // sound.setVolume(0.5);
+  // sound.play();
+  beatReady = true;
+});
+const analyser = new THREE.AudioAnalyser(sound, 32);
 window.addEventListener('keydown', e => {
   if (e.which === 77 && beatReady) { // M
     beat = !beat;
