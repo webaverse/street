@@ -203,7 +203,7 @@ const streetMesh = (() => {
 streetMesh.position.set(0, -1/2, 0);
 app.object.add(streetMesh);
 
-function mod(a, n) {
+/* function mod(a, n) {
   return ((a%n)+n)%n;
 }
 const floorMesh = (() => {
@@ -293,50 +293,8 @@ const floorMesh = (() => {
     varying float vTypez;
     varying float vDepth;
     void main() {
-      vec3 c;
-      float a;
-      /* if (
-        vPosition.x >= uSelectedParcel.x &&
-        vPosition.z >= uSelectedParcel.y &&
-        vPosition.x <= uSelectedParcel.z &&
-        vPosition.z <= uSelectedParcel.w
-      ) {
-        c = uSelectedColor;
-      } else { */
-        c = vec3(${new THREE.Color(0xCCCCCC).toArray().join(', ')});
-        // c = vec3(0.3);
-      // }
-      /* float add = 0.0;
-      if (
-        vPosition.x >= uHoverParcel.x &&
-        vPosition.z >= uHoverParcel.y &&
-        vPosition.x <= uHoverParcel.z &&
-        vPosition.z <= uHoverParcel.w
-      ) {
-        add = 0.2;
-      } else {
-        vec3 f = fract(vPosition);
-        if (vTypex >= 2.0/8.0) {
-          if (f.x >= 0.8) {
-            add = 0.2;
-          }
-        } else if (vTypex >= 1.0/8.0) {
-          if (f.x <= 0.2) {
-            add = 0.2;
-          }
-        }
-        if (vTypez >= 2.0/8.0) {
-          if (f.z >= 0.8) {
-            add = 0.2;
-          }
-        } else if (vTypez >= 1.0/8.0) {
-          if (f.z <= 0.2) {
-            add = 0.2;
-          }
-        }
-      }
-      c += add; */
-      a = (1.0-vDepth)*0.5;
+      vec3 c = vec3(${new THREE.Color(0xCCCCCC).toArray().join(', ')});
+      float a = (1.0-vDepth)*0.5;
       gl_FragColor = vec4(c, a);
     }
   `;
@@ -374,7 +332,7 @@ const floorMesh = (() => {
   return mesh;
 })();
 floorMesh.position.set(0, -0.02, 0);
-// app.object.add(floorMesh);
+app.object.add(floorMesh); */
 
 const gridMesh = (() => {
   const geometry = (() => {
