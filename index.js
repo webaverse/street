@@ -253,8 +253,6 @@ const floorMesh = (() => {
   geometry.setAttribute('center', new THREE.BufferAttribute(centers, 3));
   geometry.setAttribute('typex', new THREE.BufferAttribute(typesx, 1));
   geometry.setAttribute('typez', new THREE.BufferAttribute(typesz, 1));
-  /* const geometry = new THREE.PlaneBufferGeometry(300, 300, 300, 300)
-    .applyMatrix4(new THREE.Matrix4().makeRotationFromQuaternion(new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, -1, 0), new THREE.Vector3(0, 0, 1)))); */
   const floorVsh = `
     #define PI 3.1415926535897932384626433832795
     uniform float uAnimation;
@@ -344,10 +342,6 @@ const floorMesh = (() => {
   `;
   const material = new THREE.ShaderMaterial({
     uniforms: {
-      /* uTex: {
-        type: 't',
-        value: new THREE.Texture(),
-      }, */
       uCurrentParcel: {
         type: 'v4',
         value: new THREE.Vector4(),
@@ -380,29 +374,29 @@ const floorMesh = (() => {
   return mesh;
 })();
 floorMesh.position.set(0, -0.02, 0);
-// app.object.add(floorMesh);
+app.object.add(floorMesh);
 
 const gridMesh = (() => {
   const geometry = (() => {
     const s = 300;
     // const maxManhattanDistance = localVector2D.set(0, 0).manhattanDistanceTo(localVector2D2.set(s/2, s/2));
 
-    const topGeometry = new THREE.PlaneBufferGeometry(s, s, s, s)
+    let geometry = new THREE.PlaneBufferGeometry(s, s, s, s)
       .applyMatrix4(new THREE.Matrix4().makeRotationFromQuaternion(new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 0, 1), new THREE.Vector3(0, 1, 0))));
 
-    for (let i = 0; i < topGeometry.attributes.position.array.length; i += 3) {
-      const x = topGeometry.attributes.position.array[i];
-      const z = topGeometry.attributes.position.array[i+2];
+    for (let i = 0; i < geometry.attributes.position.array.length; i += 3) {
+      const x = geometry.attributes.position.array[i];
+      const z = geometry.attributes.position.array[i+2];
       const d = Math.abs(x); 
       const f = Math.min(Math.max((d - 5) / 30, 0), 1)**2;
       const y = -0.01 + Math.min(Math.max(simplex.noise2D(x/500, z/500) * f * 30, 0), 100);
       // console.log('got distance', z, d/maxDistance);
-      topGeometry.attributes.position.array[i+1] = y;
+      geometry.attributes.position.array[i+1] = y;
     }
-    const dynamicPositionYs = new Float32Array(topGeometry.attributes.position.array.length/3);
+    const dynamicPositionYs = new Float32Array(geometry.attributes.position.array.length/3);
     for (let i = 0; i < dynamicPositionYs.length; i += 3) {
-      const x = topGeometry.attributes.position.array[i*3];
-      const z = topGeometry.attributes.position.array[i*3+2];
+      const x = geometry.attributes.position.array[i*3];
+      const z = geometry.attributes.position.array[i*3+2];
 
       // const d = Math.abs(x); 
       // const f = Math.min(Math.max((d - 5) / 30, 0), 1)**2;
@@ -412,42 +406,8 @@ const gridMesh = (() => {
       dynamicPositionYs[i+1] = y;
       dynamicPositionYs[i+2] = y;
     }
-    topGeometry.setAttribute('dynamicPositionY', new THREE.BufferAttribute(dynamicPositionYs, 1));
+    geometry.setAttribute('dynamicPositionY', new THREE.BufferAttribute(dynamicPositionYs, 1));
 
-    /* const bottomGeometry = new THREE.PlaneBufferGeometry(s, s, s, s);
-    const lines = [
-      new THREE.Line3(new THREE.Vector3(-s/2, -s/2, 0), new THREE.Vector3(-s/2, s/2, 0)),
-      new THREE.Line3(new THREE.Vector3(-s/2, s/2, 0), new THREE.Vector3(s/2, s/2, 0)),
-      new THREE.Line3(new THREE.Vector3(s/2, s/2, 0), new THREE.Vector3(s/2, -s/2, 0)),
-      new THREE.Line3(new THREE.Vector3(s/2, -s/2, 0), new THREE.Vector3(-s/2, -s/2, 0)),
-    ];
-    const _closestDistanceToLine = (x, y) => {
-      localVector.set(x, y, 0);
-      let result = Infinity;
-      for (const line of lines) {
-        const point = line.closestPointToPoint(localVector, true, localVector2);
-        const d = localVector.distanceTo(point);
-        if (d < result) {
-          result = d;
-        }
-      }
-      return result;
-    };
-    for (let i = 0; i < bottomGeometry.attributes.position.array.length; i += 3) {
-      const x = bottomGeometry.attributes.position.array[i];
-      const y = bottomGeometry.attributes.position.array[i+1];
-      // console.log('got simplex', simplex.noise2D(x, y));
-      const d = _closestDistanceToLine(x, y); // localVector2D.set(x, y).manhattanDistanceTo(localVector2D2);
-      const z = (10 + simplex.noise2D(x/100, y/100)) * (d/maxDistance)**0.5;
-      // console.log('got distance', z, d/maxDistance);
-      bottomGeometry.attributes.position.array[i+2] = z;
-    }
-    bottomGeometry.applyMatrix4(new THREE.Matrix4().makeRotationFromQuaternion(new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 0, 1), new THREE.Vector3(0, -1, 0)))); */
-
-    let geometry = topGeometry; /* BufferGeometryUtils.mergeBufferGeometries([
-      topGeometry,
-      bottomGeometry,
-    ]); */
     geometry = geometry.toNonIndexed();
     const barycentrics = new Float32Array(geometry.attributes.position.array.length);
     let barycentricIndex = 0;
