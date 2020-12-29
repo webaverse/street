@@ -380,7 +380,7 @@ const floorMesh = (() => {
   return mesh;
 })();
 floorMesh.position.set(0, -0.02, 0);
-app.object.add(floorMesh);
+// app.object.add(floorMesh);
 
 const gridMesh = (() => {
   const geometry = (() => {
