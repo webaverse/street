@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import {BufferGeometryUtils} from 'BufferGeometryUtils';
 import {scene, renderer, camera, runtime, world, physics, ui, rig, app, appManager} from 'app';
 import Simplex from './simplex-noise.js';
+import alea from './alea.js';
 
 const parcelSize = 16;
 const width = 10;
@@ -624,6 +625,122 @@ const physicsId = physics.addBoxGeometry(streetMesh.position, streetMesh.quatern
 /* app.addEventListener('unload', () => {
   physics.removeGeometry(physicsId);
 }); */
+
+const stacksMesh = (() => {
+  const position = new THREE.Vector3();
+  // const quaternion = new THREE.Quaternion();
+  const rng = alea('lol');
+
+  const w = 4;
+  const s = 0.95;
+  const floorGeometry = new THREE.BoxBufferGeometry(w, 0.1, w)
+    .applyMatrix4(new THREE.Matrix4().makeScale(s, s, s))
+    .applyMatrix4(new THREE.Matrix4().makeTranslation(0, 0.1/2, 0));
+  const rampGeometry = new THREE.BoxBufferGeometry(w, 0.1, w * Math.sqrt(2))
+    .applyMatrix4(new THREE.Matrix4().makeScale(s, s, s))
+    .applyMatrix4(new THREE.Matrix4().makeRotationFromQuaternion(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(1, 0, 0), Math.PI/4)))
+    .applyMatrix4(new THREE.Matrix4().makeTranslation(0, w/2, 0));
+
+  const geometry = new THREE.BufferGeometry();
+
+  const positions = new Float32Array(1024 * 1024);
+  const indices = new Uint32Array(1024 * 1024);
+  let positionIndex = 0;
+  let indexIndex = 0;
+  const _mergeGeometry = g => {
+    for (let i = 0; i < g.index.array.length; i++) {
+      indices[indexIndex++] = g.index.array[i] + positionIndex/3;
+    }
+    positions.set(g.attributes.position.array, positionIndex);
+    positionIndex += g.attributes.position.array.length;
+  };
+
+  const seenPositions = {};
+  const _getKey = p => p.toArray().join(':');
+
+  const roadLength = 30;
+  let lastDirection = new THREE.Vector3();
+  let lastGeometryType = 'floor';
+  for (let i = 0; i < roadLength; i++) {
+    if (lastGeometryType === 'floor') {
+      const g = floorGeometry.clone();
+      g.applyMatrix4(new THREE.Matrix4().makeTranslation(position.x, position.y, position.z));
+      _mergeGeometry(g);
+    } else if (lastGeometryType === 'ramp') {
+      const g = rampGeometry.clone();
+      g.applyMatrix4(new THREE.Matrix4().makeRotationFromQuaternion(new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 0, -1), new THREE.Vector3(lastDirection.x, 0, lastDirection.z))));
+      g.applyMatrix4(new THREE.Matrix4().makeTranslation(position.x, position.y, position.z));
+      _mergeGeometry(g);
+    }
+
+    const k = _getKey(position);
+    seenPositions[k] = lastGeometryType;
+
+    if (lastGeometryType === 'ramp') {
+      position.y += w;
+    }
+
+    for (;;) {
+      let direction, geometryType;
+      if (lastGeometryType === 'floor') {
+        direction = (() => {
+          const r = rng();
+          if (r < 1/4) {
+            return new THREE.Vector3(-1, 0, 0);
+          } else if (r < 2/4) {
+            return new THREE.Vector3(1, 0, 0);
+          } else if (r < 3/4) {
+            return new THREE.Vector3(0, 0, -1);
+          } else {
+            return new THREE.Vector3(0, 0, 1);
+          }
+        })();
+        const r = rng();
+        if (r < 0.25) {
+          // direction.y += 0.5;
+          geometryType = 'ramp';
+        } else {
+          geometryType = 'floor';
+        }
+      } else {
+        const r = rng();
+        if (r < 0.5) { // end
+          direction = lastDirection.clone();
+          // direction.y = 0;
+          geometryType = 'floor';
+        } else { // continue
+          direction = lastDirection.clone();
+          geometryType = 'ramp';
+        }
+      }
+      console.log('got direction', direction.toArray(), geometryType);
+
+      const nextPosition = position.clone().add(direction.clone().multiplyScalar(w));
+      const k = _getKey(nextPosition);
+      if (!seenPositions[k] && seenPositions[_getKey(nextPosition.clone().sub(new THREE.Vector3(0, w, 0)))] !== 'ramp') {
+        position.copy(nextPosition);
+        lastDirection = direction;
+        lastGeometryType = geometryType;
+        break;
+      } else {
+        continue;
+      }
+    }
+  }
+  // console.log('draw range', indices, indexIndex/3);
+
+  geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+  geometry.setIndex(new THREE.BufferAttribute(indices, 1));
+  geometry.setDrawRange(0, indexIndex);
+
+  const material = new THREE.MeshBasicMaterial({
+    color: 0x9575cd,
+  });
+  const mesh = new THREE.Mesh(geometry, material);
+  mesh.frustumCulled = false;
+  return mesh;
+})();
+app.object.add(stacksMesh);
 
 let beat = false;
 let beatReady = false;
