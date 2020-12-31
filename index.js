@@ -640,9 +640,12 @@ const stacksMesh = (() => {
     .applyMatrix4(new THREE.Matrix4().makeScale(s, s, s))
     .applyMatrix4(new THREE.Matrix4().makeRotationFromQuaternion(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(1, 0, 0), Math.PI/4)))
     .applyMatrix4(new THREE.Matrix4().makeTranslation(0, w/2, 0));
+  const wallGeometry = new THREE.BoxBufferGeometry(w, w, 0.1)
+    .applyMatrix4(new THREE.Matrix4().makeScale(s, s, s))
+    // .applyMatrix4(new THREE.Matrix4().makeRotationFromQuaternion(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(1, 0, 0), Math.PI)))
+    .applyMatrix4(new THREE.Matrix4().makeTranslation(0, w/2, -w/2 + 0.1/2));
 
   const geometry = new THREE.BufferGeometry();
-
   const positions = new Float32Array(1024 * 1024);
   const indices = new Uint32Array(1024 * 1024);
   let positionIndex = 0;
@@ -655,8 +658,124 @@ const stacksMesh = (() => {
     positionIndex += g.attributes.position.array.length;
   };
 
-  const seenPositions = {};
   const _getKey = p => p.toArray().join(':');
+
+  const numBuildings = 10;
+  const seenBuildings = {};
+  for (let i = 0; i < numBuildings; i++) {
+    let buildingSize, buildingPosition;
+    for (;;) {
+      buildingSize = new THREE.Vector3(
+        1 + Math.floor(rng() * 5),
+        1 + Math.floor(rng() * 10),
+        1 + Math.floor(rng() * 5),
+      );
+      buildingPosition = new THREE.Vector3(
+        Math.floor(-20 + rng() * 40),
+        Math.floor(-20 + rng() * 40),
+        Math.floor(-20 + rng() * 40),
+      );
+
+      const _fits = () => {
+        for (let dx = 0; dx < buildingSize.x; dx++) {
+          for (let dy = 0; dy < buildingSize.y; dy++) {
+            for (let dz = 0; dz < buildingSize.z; dz++) {
+              const ax = buildingPosition.x + dx;
+              const ay = buildingPosition.y + dy;
+              const az = buildingPosition.z + dz;
+              const k = _getKey(new THREE.Vector3(ax, ay, az).multiplyScalar(w));
+              if (!seenBuildings[k]) {
+                // nothing
+              } else {
+                return false;
+              }
+            }
+          }
+        }
+        return true;
+      };
+      const _mark = () => {
+        for (let dx = 0; dx < buildingSize.x; dx++) {
+          for (let dy = 0; dy < buildingSize.y; dy++) {
+            for (let dz = 0; dz < buildingSize.z; dz++) {
+              const ax = buildingPosition.x + dx;
+              const ay = buildingPosition.y + dy;
+              const az = buildingPosition.z + dz;
+              const k = _getKey(new THREE.Vector3(ax, ay, az).multiplyScalar(w));
+              seenBuildings[k] = true;
+            }
+          }
+        }
+      };
+      const _draw = () => {
+        for (let dx = 0; dx < buildingSize.x; dx++) {
+          {
+            const ax = buildingPosition.x + dx;
+            const az = buildingPosition.z;
+
+            const g = wallGeometry.clone()
+              // .applyMatrix4(new THREE.Matrix4().makeRotationFromQuaternion(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), Math.PI)))
+              .applyMatrix4(new THREE.Matrix4().makeTranslation(ax * w, 0, az * w));
+            _mergeGeometry(g);
+            // for (let y = 0; y < buildingSize.y; y++) {
+              // for (let z = 0; z < buildingSize.z; z++) {
+              // }
+            // }
+          }
+          {
+            const ax = buildingPosition.x + dx;
+            const az = buildingPosition.z + buildingSize.z - 1;
+
+            const g = wallGeometry.clone()
+              .applyMatrix4(new THREE.Matrix4().makeRotationFromQuaternion(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), Math.PI)))
+              .applyMatrix4(new THREE.Matrix4().makeTranslation(ax * w, 0, az * w));
+            _mergeGeometry(g);
+            // for (let y = 0; y < buildingSize.y; y++) {
+              // for (let z = 0; z < buildingSize.z; z++) {
+              // }
+            // }
+          }
+        }
+        for (let dz = 0; dz < buildingSize.z; dz++) {
+          {
+            const ax = buildingPosition.x;
+            const az = buildingPosition.z + dz;
+
+            const g = wallGeometry.clone()
+              .applyMatrix4(new THREE.Matrix4().makeRotationFromQuaternion(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), Math.PI/2)))
+              .applyMatrix4(new THREE.Matrix4().makeTranslation(ax * w, 0, az * w));
+            _mergeGeometry(g);
+            // for (let y = 0; y < buildingSize.y; y++) {
+              // for (let z = 0; z < buildingSize.z; z++) {
+              // }
+            // }
+          }
+          {
+            const ax = buildingPosition.x + buildingSize.x - 1;
+            const az = buildingPosition.z + dz;
+
+            const g = wallGeometry.clone()
+              .applyMatrix4(new THREE.Matrix4().makeRotationFromQuaternion(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), -Math.PI/2)))
+              .applyMatrix4(new THREE.Matrix4().makeTranslation(ax * w, 0, az * w));
+            _mergeGeometry(g);
+            // for (let y = 0; y < buildingSize.y; y++) {
+              // for (let z = 0; z < buildingSize.z; z++) {
+              // }
+            // }
+          }
+        }
+      };
+      if (_fits()) {
+        _mark();
+        _draw();
+        break;
+      } else {
+        continue;
+      }
+    }
+  }
+
+  const seenPositions = {};
 
   const roadLength = 30;
   let lastDirection = new THREE.Vector3();
