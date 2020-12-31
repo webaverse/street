@@ -672,7 +672,7 @@ const stacksMesh = (() => {
       );
       buildingPosition = new THREE.Vector3(
         Math.floor(-20 + rng() * 40),
-        Math.floor(-20 + rng() * 40),
+        0,
         Math.floor(-20 + rng() * 40),
       );
 
@@ -709,26 +709,28 @@ const stacksMesh = (() => {
       };
       const _draw = () => {
         for (let dx = 0; dx < buildingSize.x; dx++) {
-          {
+          for (let dy = 0; dy < buildingSize.y; dy++) {
             const ax = buildingPosition.x + dx;
+            const ay = buildingPosition.y + dy;
             const az = buildingPosition.z;
 
             const g = wallGeometry.clone()
               // .applyMatrix4(new THREE.Matrix4().makeRotationFromQuaternion(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), Math.PI)))
-              .applyMatrix4(new THREE.Matrix4().makeTranslation(ax * w, 0, az * w));
+              .applyMatrix4(new THREE.Matrix4().makeTranslation(ax * w, ay * w, az * w));
             _mergeGeometry(g);
             // for (let y = 0; y < buildingSize.y; y++) {
               // for (let z = 0; z < buildingSize.z; z++) {
               // }
             // }
           }
-          {
+          for (let dy = 0; dy < buildingSize.y; dy++) {
             const ax = buildingPosition.x + dx;
+            const ay = buildingPosition.y + dy;
             const az = buildingPosition.z + buildingSize.z - 1;
 
             const g = wallGeometry.clone()
               .applyMatrix4(new THREE.Matrix4().makeRotationFromQuaternion(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), Math.PI)))
-              .applyMatrix4(new THREE.Matrix4().makeTranslation(ax * w, 0, az * w));
+              .applyMatrix4(new THREE.Matrix4().makeTranslation(ax * w, ay * w, az * w));
             _mergeGeometry(g);
             // for (let y = 0; y < buildingSize.y; y++) {
               // for (let z = 0; z < buildingSize.z; z++) {
@@ -737,26 +739,28 @@ const stacksMesh = (() => {
           }
         }
         for (let dz = 0; dz < buildingSize.z; dz++) {
-          {
+          for (let dy = 0; dy < buildingSize.y; dy++) {
             const ax = buildingPosition.x;
+            const ay = buildingPosition.y + dy;
             const az = buildingPosition.z + dz;
 
             const g = wallGeometry.clone()
               .applyMatrix4(new THREE.Matrix4().makeRotationFromQuaternion(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), Math.PI/2)))
-              .applyMatrix4(new THREE.Matrix4().makeTranslation(ax * w, 0, az * w));
+              .applyMatrix4(new THREE.Matrix4().makeTranslation(ax * w, ay * w, az * w));
             _mergeGeometry(g);
             // for (let y = 0; y < buildingSize.y; y++) {
               // for (let z = 0; z < buildingSize.z; z++) {
               // }
             // }
           }
-          {
+          for (let dy = 0; dy < buildingSize.y; dy++) {
             const ax = buildingPosition.x + buildingSize.x - 1;
+            const ay = buildingPosition.y + dy;
             const az = buildingPosition.z + dz;
 
             const g = wallGeometry.clone()
               .applyMatrix4(new THREE.Matrix4().makeRotationFromQuaternion(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), -Math.PI/2)))
-              .applyMatrix4(new THREE.Matrix4().makeTranslation(ax * w, 0, az * w));
+              .applyMatrix4(new THREE.Matrix4().makeTranslation(ax * w, ay * w, az * w));
             _mergeGeometry(g);
             // for (let y = 0; y < buildingSize.y; y++) {
               // for (let z = 0; z < buildingSize.z; z++) {
