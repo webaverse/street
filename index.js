@@ -1130,8 +1130,136 @@ const stacksMesh = (() => {
         // render();
       }, function progress() {}, reject);
     });
-
-    
+    const floorMap = {
+      [JSON.stringify([
+        [0, 0, 0],
+        [0, 1, 0],
+        [0, 0, 0],
+      ])]: {
+        name: 'Floor',
+        quaternion: new THREE.Quaternion(),
+      },
+      [JSON.stringify([
+        [0, 1, 0],
+        [0, 1, 0],
+        [0, 0, 0],
+      ])]: {
+        name: 'I',
+        quaternion: new THREE.Quaternion(),
+      },
+      [JSON.stringify([
+        [0, 0, 0],
+        [1, 1, 0],
+        [0, 0, 0],
+      ])]: {
+        name: 'I',
+        quaternion: new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), Math.PI/2),
+      },
+      [JSON.stringify([
+        [0, 0, 0],
+        [0, 1, 0],
+        [0, 1, 0],
+      ])]: {
+        name: 'i',
+        quaternion: new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), Math.PI),
+      },
+      [JSON.stringify([
+        [0, 0, 0],
+        [0, 1, 1],
+        [0, 0, 0],
+      ])]: {
+        name: 'I',
+        quaternion: new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), Math.PI*3/2),
+      },
+      [JSON.stringify([
+        [0, 1, 0],
+        [1, 1, 0],
+        [0, 0, 0],
+      ])]: {
+        name: 'R',
+        quaternion: new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), Math.PI),
+      },
+      [JSON.stringify([
+        [0, 0, 0],
+        [1, 1, 0],
+        [0, 1, 0],
+      ])]: {
+        name: 'R',
+        quaternion: new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), Math.PI*3/2),
+      },
+      [JSON.stringify([
+        [0, 0, 0],
+        [0, 1, 1],
+        [0, 1, 0],
+      ])]: {
+        name: 'R',
+        quaternion: new THREE.Quaternion(),
+      },
+      [JSON.stringify([
+        [0, 1, 0],
+        [0, 1, 1],
+        [0, 0, 0],
+      ])]: {
+        name: 'R',
+        quaternion: new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), Math.PI/2),
+      },
+      [JSON.stringify([
+        [0, 1, 0],
+        [0, 1, 0],
+        [0, 1, 0],
+      ])]: {
+        name: '-',
+        quaternion: new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), Math.PI/2),
+      },
+      [JSON.stringify([
+        [0, 0, 0],
+        [1, 1, 1],
+        [0, 0, 0],
+      ])]: {
+        name: '-',
+        quaternion: new THREE.Quaternion(),
+      },
+      [JSON.stringify([
+        [0, 0, 0],
+        [1, 1, 1],
+        [0, 1, 0],
+      ])]: {
+        name: 'T',
+        quaternion: new THREE.Quaternion(),
+      },
+      [JSON.stringify([
+        [0, 1, 0],
+        [0, 1, 1],
+        [0, 1, 0],
+      ])]: {
+        name: 'T',
+        quaternion: new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), Math.PI/2),
+      },
+      [JSON.stringify([
+        [0, 1, 0],
+        [1, 1, 1],
+        [0, 0, 0],
+      ])]: {
+        name: 'T',
+        quaternion: new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), Math.PI),
+      },
+      [JSON.stringify([
+        [0, 1, 0],
+        [1, 1, 0],
+        [0, 1, 0],
+      ])]: {
+        name: 'T',
+        quaternion: new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), Math.PI*3/2),
+      },
+      [JSON.stringify([
+        [0, 1, 0],
+        [1, 1, 1],
+        [0, 1, 0],
+      ])]: {
+        name: 'O',
+        quaternion: new THREE.Quaternion(),
+      },
+    };
 
     mesh.add(modularMesh);
   })();
