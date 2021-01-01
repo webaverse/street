@@ -881,7 +881,7 @@ const stacksMesh = (() => {
 })();
 app.object.add(stacksMesh);
 
-const stcksPhysicsId = physics.addGeometry(stacksMesh);
+const stacksPhysicsId = physics.addGeometry(stacksMesh);
 
 let beat = false;
 let beatReady = false;
