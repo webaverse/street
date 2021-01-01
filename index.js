@@ -338,6 +338,10 @@ const floorMesh = (() => {
 floorMesh.position.set(0, -0.02, 0);
 app.object.add(floorMesh); */
 
+const stacksBoundingBox = new THREE.Box2(
+  new THREE.Vector2(0, 0),
+  new THREE.Vector2(50, 50),
+);
 const gridMesh = (() => {
   const geometry = (() => {
     const s = 300;
@@ -351,7 +355,7 @@ const gridMesh = (() => {
       const z = geometry.attributes.position.array[i+2];
       const d = Math.abs(x); 
       const f = Math.min(Math.max((d - 5) / 30, 0), 1)**2;
-      const y = -0.01 + Math.min(Math.max(simplex.noise2D(x/500, z/500) * f * 30, 0), 100);
+      const y = -0.01 + Math.min(Math.max(simplex.noise2D(x/500, z/500) * f * 30, 0), 100) * Math.min(stacksBoundingBox.distanceToPoint(new THREE.Vector2(x, z)), 1);
       // console.log('got distance', z, d/maxDistance);
       geometry.attributes.position.array[i+1] = y;
     }
