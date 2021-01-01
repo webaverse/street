@@ -1286,12 +1286,6 @@ const stacksMesh = (() => {
           const s = JSON.stringify(j);
           const entry = floorMap[s];
           
-          /* if (!(dz == 4 && dx === 3)) {
-            continue;
-          } else {
-            debugger;
-          } */
-          
           if (entry) {
             const o = modularMesh.getObjectByName(entry.name);
             if (o) {
