@@ -1042,8 +1042,8 @@ const stacksMesh = (() => {
       }
     `,
     transparent: true,
-    polygonOffset: true,
-    polygonOffsetFactor: -1,
+    // polygonOffset: true,
+    // polygonOffsetFactor: -1,
     // polygonOffsetUnits: 1,
   });
   const mesh = new THREE.Mesh(geometry, material);
