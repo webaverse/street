@@ -1093,7 +1093,7 @@ const stacksMesh = (() => {
     signMesh.position.set(10/2, 2, 10);
     signMesh.quaternion.setFromAxisAngle(new THREE.Vector3(0, 1, 0), -Math.PI/2);
 
-    const japanese = signsMesh.getChildByName('Japanese');
+    const japanese = signsMesh.getObjectByName('Japanese');
     
     japanese.position.set(-4, 0, 0.05);
     japanese.quaternion.premultiply(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), -Math.PI/2));
@@ -1103,7 +1103,7 @@ const stacksMesh = (() => {
     });
     signMesh.add(japanese);
 
-    const english = signsMesh.getChildByName('English');
+    const english = signsMesh.getObjectByName('English');
     english.position.set(2, -0.5, 0.01);
     english.quaternion.premultiply(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), -Math.PI/2));
     english.material = new THREE.MeshBasicMaterial({
