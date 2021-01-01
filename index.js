@@ -768,6 +768,22 @@ const stacksMesh = (() => {
             // }
           }
         }
+        for (let dx = 0; dx < buildingSize.x; dx++) {
+          for (let dz = 0; dz < buildingSize.z; dz++) {
+            const ax = buildingPosition.x + dx;
+            const ay = buildingPosition.y + buildingSize.y;
+            const az = buildingPosition.z + dz;
+
+            const g = floorGeometry.clone()
+              // .applyMatrix4(new THREE.Matrix4().makeRotationFromQuaternion(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), Math.PI)))
+              .applyMatrix4(new THREE.Matrix4().makeTranslation(ax * w, ay * w, az * w));
+            _mergeGeometry(g);
+            // for (let y = 0; y < buildingSize.y; y++) {
+              // for (let z = 0; z < buildingSize.z; z++) {
+              // }
+            // }
+          }
+        }
       };
       if (_fits()) {
         _mark();
