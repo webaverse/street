@@ -881,6 +881,8 @@ const stacksMesh = (() => {
 })();
 app.object.add(stacksMesh);
 
+const stcksPhysicsId = physics.addGeometry(stacksMesh);
+
 let beat = false;
 let beatReady = false;
 const listener = new THREE.AudioListener();
