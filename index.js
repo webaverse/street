@@ -1054,6 +1054,17 @@ app.object.add(stacksMesh);
 
 const stacksPhysicsId = physics.addGeometry(stacksMesh);
 
+new GLTFLoader().load( app.files['./sakura.glb'], function ( object ) {
+  // console.log('loaded', object);
+  object = object.scene;
+  object.scale.multiplyScalar(3);
+  // object.position.y = 2;
+  // window.object = object;
+  // scene.add( object );
+  app.object.add(object);
+  // render();
+} );
+
 let beat = false;
 let beatReady = false;
 const listener = new THREE.AudioListener();
