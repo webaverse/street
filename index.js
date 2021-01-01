@@ -1067,6 +1067,42 @@ const stacksMesh = (() => {
   });
   const mesh = new THREE.Mesh(geometry, material);
   mesh.frustumCulled = false;
+
+  (async () => {
+    const signsMesh = await new Promise((accept, reject) => {
+      gltfLoader.load(`https://webaverse.github.io/street-assets/sign.glb`, function(object) {
+        // console.log('loaded', object);
+        object = object.scene;
+        // object.scale.multiplyScalar(3);
+        // object.position.y = 2;
+        // window.object = object;
+        // scene.add( object );
+        // app.object.add(object);
+
+        accept(object);
+        // render();
+      }, function progress() {}, reject);
+    });
+
+    const japanese = signsMesh.getChildByName('Japanese');
+    japanese.position.set(10/2, 2, 0);
+    japanese.quaternion.premultiply(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), Math.PI));
+    japanese.material = new THREE.MeshBasicMaterial({
+      color: 0x26c6da,
+      // side: THREE.DoubleSide,
+    });
+    mesh.add(japanese);
+
+    const english = signsMesh.getChildByName('English');
+    english.position.set(10/2, 1.5, 6);
+    english.quaternion.premultiply(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), Math.PI));
+    english.material = new THREE.MeshBasicMaterial({
+      color: 0xec407a,
+      // side: THREE.DoubleSide,
+    });
+    mesh.add(english);
+  })();
+
   return mesh;
 })();
 app.object.add(stacksMesh);
