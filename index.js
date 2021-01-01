@@ -875,7 +875,7 @@ const stacksMesh = (() => {
           geometryType = 'ramp';
         }
       }
-      console.log('got direction', direction.toArray(), geometryType);
+      // console.log('got direction', direction.toArray(), geometryType);
 
       const nextPosition = position.clone().add(direction.clone().multiplyScalar(w));
       const k = _getKey(nextPosition);
