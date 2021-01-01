@@ -1071,7 +1071,7 @@ const stacksPhysicsId = physics.addGeometry(stacksMesh);
 
 (async () => {
   const sakuraMesh = await new Promise((accept, reject) => {
-    gltfLoader.load(app.files['./sakura.glb'], function(object) {
+    gltfLoader.load(`https://webaverse.github.io/street-assets/sakura.glb`, function(object) {
       // console.log('loaded', object);
       object = object.scene;
       object.scale.multiplyScalar(3);
