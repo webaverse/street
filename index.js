@@ -1300,14 +1300,6 @@ const stacksPhysicsId = physics.addGeometry(stacksMesh);
   }
 })();
 
-  object = object.scene;
-  // object.position.y = 2;
-  window.object = object;
-  // scene.add( object );
-  app.object.add(object);
-  // render();
-} ); */
-
 let beat = false;
 let beatReady = false;
 const listener = new THREE.AudioListener();
