@@ -1160,7 +1160,7 @@ const stacksMesh = (() => {
         [0, 1, 0],
         [0, 1, 0],
       ])]: {
-        name: 'i',
+        name: 'I',
         quaternion: new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), Math.PI),
       },
       [JSON.stringify([
