@@ -1087,6 +1087,8 @@ const stacksMesh = (() => {
     const signMesh = new THREE.Mesh(new THREE.PlaneBufferGeometry(12, 3), new THREE.MeshBasicMaterial({
       color: 0x111111,
       side: THREE.DoubleSide,
+      transparent: true,
+      opacity: 0.9,
     }));
     signMesh.position.set(10/2, 2, 10);
     signMesh.quaternion.setFromAxisAngle(new THREE.Vector3(0, 1, 0), -Math.PI/2);
@@ -1097,7 +1099,7 @@ const stacksMesh = (() => {
     japanese.quaternion.premultiply(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), -Math.PI/2));
     japanese.material = new THREE.MeshBasicMaterial({
       color: 0x26c6da,
-      // side: THREE.DoubleSide,
+      side: THREE.DoubleSide,
     });
     signMesh.add(japanese);
 
@@ -1106,7 +1108,7 @@ const stacksMesh = (() => {
     english.quaternion.premultiply(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), -Math.PI/2));
     english.material = new THREE.MeshBasicMaterial({
       color: 0xec407a,
-      // side: THREE.DoubleSide,
+      side: THREE.DoubleSide,
     });
     signMesh.add(english);
 
