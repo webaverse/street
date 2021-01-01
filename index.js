@@ -1086,6 +1086,7 @@ const stacksMesh = (() => {
 
     const signMesh = new THREE.Mesh(new THREE.PlaneBufferGeometry(12, 3), new THREE.MeshBasicMaterial({
       color: 0x111111,
+      side: THREE.DoubleSide,
     }));
     signMesh.position.set(10/2, 2, 10);
     signMesh.quaternion.setFromAxisAngle(new THREE.Vector3(0, 1, 0), -Math.PI/2);
