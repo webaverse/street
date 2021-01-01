@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import {BufferGeometryUtils} from 'BufferGeometryUtils';
+import {GLTFLoader} from 'GLTFLoader';
 import {scene, renderer, camera, runtime, world, physics, ui, rig, app, appManager} from 'app';
 import Simplex from './simplex-noise.js';
 import alea from './alea.js';
@@ -33,6 +34,8 @@ const localRaycaster = new THREE.Raycaster();
 const localRay = new THREE.Ray();
 const localColor = new THREE.Color();
 const localColor2 = new THREE.Color();
+const gltfLoader = new GLTFLoader();
+
 
 class MultiSimplex {
   constructor(seed, octaves) {
@@ -626,6 +629,7 @@ const floorPhysicsId = physics.addBoxGeometry(streetMesh.position, streetMesh.qu
   physics.removeGeometry(physicsId);
 }); */
 
+const parcelSpecs = [];
 const stacksMesh = (() => {
   const position = new THREE.Vector3();
   // const quaternion = new THREE.Quaternion();
@@ -772,6 +776,8 @@ const stacksMesh = (() => {
             // }
           }
         }
+
+        // roof
         for (let dx = 0; dx < buildingSize.x; dx++) {
           for (let dz = 0; dz < buildingSize.z; dz++) {
             const ax = buildingPosition.x + dx;
@@ -787,6 +793,15 @@ const stacksMesh = (() => {
               // }
             // }
           }
+        }
+
+        const r = rng();
+        if (r < 0.5) {
+          const parcelSpec = {
+            position: new THREE.Vector3((buildingPosition.x - 0.5) * w, (buildingPosition.y + buildingSize.y) * w, (buildingPosition.z - 0.5) * w),
+            size: new THREE.Vector3(buildingSize.x * w, 0, buildingSize.z * w),
+          };
+          parcelSpecs.push(parcelSpec);
         }
       };
       if (_fits()) {
@@ -1054,16 +1069,35 @@ app.object.add(stacksMesh);
 
 const stacksPhysicsId = physics.addGeometry(stacksMesh);
 
-new GLTFLoader().load( app.files['./sakura.glb'], function ( object ) {
-  // console.log('loaded', object);
+(async () => {
+  const sakuraMesh = await new Promise((accept, reject) => {
+    gltfLoader.load(app.files['./sakura.glb'], function(object) {
+      // console.log('loaded', object);
+      object = object.scene;
+      object.scale.multiplyScalar(3);
+      // object.position.y = 2;
+      // window.object = object;
+      // scene.add( object );
+      // app.object.add(object);
+      accept(object);
+      // render();
+    }, function progress() {}, reject);
+  });
+  for (const parcelSpec of parcelSpecs) {
+    const m = sakuraMesh.clone();
+    m.position.copy(parcelSpec.position)
+      .add(parcelSpec.size.clone().multiplyScalar(0.5));
+    app.object.add(m);
+  }
+})();
+
   object = object.scene;
-  object.scale.multiplyScalar(3);
   // object.position.y = 2;
-  // window.object = object;
+  window.object = object;
   // scene.add( object );
   app.object.add(object);
   // render();
-} );
+} ); */
 
 let beat = false;
 let beatReady = false;
