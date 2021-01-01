@@ -1268,8 +1268,52 @@ const stacksMesh = (() => {
       [0, 0, 1, 1, 1],
       [0, 0, 1, 1, 1],
     ];
+    const width = testMap[0].length;
+    const height = testMap.length;
+    for (let dx = 1; dx < width; dx++) {
+      for (let dz = 0; dz < height; dz++) {
+        if (testMap[dz][dx]) {
+          const up = (testMap[dz - 1] || [])[dx] || 0;
+          const left = (testMap[dz] || [])[dx - 1] || 0;
+          const right = (testMap[dz] || [])[dx + 1] || 0;
+          const down = (testMap[dz + 1] || [])[dx] || 0;
+          
+          const j = [
+            [0, up, 0],
+            [left, 1, right],
+            [0, down, 0],
+          ];
+          const s = JSON.stringify(j);
+          const entry = floorMap[s];
+          
+          /* if (!(dz == 4 && dx === 3)) {
+            continue;
+          } else {
+            debugger;
+          } */
+          
+          if (entry) {
+            const o = modularMesh.getObjectByName(entry.name);
+            if (o) {
+              const m = o.clone();
+              m.position.x = dx*w;
+              m.position.z = dz*w;
+              
+              m.position.x += 10;
 
-    mesh.add(modularMesh);
+              m.quaternion.premultiply(entry.quaternion);
+              mesh.add(m);
+            } else {
+              debugger;
+            }
+          } else {
+            debugger;
+          }
+        }
+      }
+    }
+
+    // mesh.add(modularMesh);
   })();
 
   return mesh;
