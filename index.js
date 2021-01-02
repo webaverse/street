@@ -1263,9 +1263,9 @@ const stacksMesh = (() => {
 
     const geometries = [];
     const _mergeMesh = (m, p, q) => {
-      if (!m.geometry) {
+      /* if (!m.geometry) {
         debugger;
-      }
+      } */
       const g = m.geometry.clone();
       g.applyMatrix4(m.matrixWorld);
       g.applyMatrix4(new THREE.Matrix4().compose(
