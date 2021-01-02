@@ -225,15 +225,53 @@ const w = 4;
   app.object.add(videophoneMesh);
 })();
 const portalMesh = (() => {
+  const geometries = [];
+
   const planeGeometry = new THREE.PlaneBufferGeometry(w, w, w, w)
     .applyMatrix4(new THREE.Matrix4().makeRotationFromQuaternion(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(1, 0, 0), -Math.PI/2)));
   for (let i = 0; i < planeGeometry.attributes.position.array.length; i += 3) {
     planeGeometry.attributes.position.array[i+1] = Math.random() * 0.2;
   }
   planeGeometry.setAttribute('particle', new THREE.BufferAttribute(new Float32Array(planeGeometry.attributes.position.array.length/3), 1));
+  planeGeometry.setAttribute('bar', new THREE.BufferAttribute(new Float32Array(planeGeometry.attributes.position.array.length/3), 1));
+  geometries.push(planeGeometry);
 
-  const geometries = [planeGeometry];
   const boxGeometry = new THREE.BoxBufferGeometry(1, 1, 1);
+  const numBars = 10;
+  // xz
+  for (let dx = 1; dx < numBars; dx++) {
+    for (let dz = 1; dz < numBars; dz++) {
+      const g = boxGeometry.clone()
+        .applyMatrix4(new THREE.Matrix4().makeScale(0.01, w, 0.01))
+        .applyMatrix4(new THREE.Matrix4().makeTranslation(-w/2 + dx/numBars * w, w/2, -w/2 + dz/numBars * w));
+      g.setAttribute('particle', new THREE.BufferAttribute(new Float32Array(boxGeometry.attributes.position.array.length/3), 1));
+      g.setAttribute('bar', new THREE.BufferAttribute(new Float32Array(boxGeometry.attributes.position.array.length/3).fill(1), 1));
+      geometries.push(g);
+    }
+  }
+  // xy
+  for (let dx = 1; dx < numBars; dx++) {
+    for (let dy = 1; dy < numBars; dy++) {
+      const g = boxGeometry.clone()
+        .applyMatrix4(new THREE.Matrix4().makeScale(0.01, 0.01, w))
+        .applyMatrix4(new THREE.Matrix4().makeTranslation(-w/2 + dx/numBars * w, dy/numBars * w, 0));
+      g.setAttribute('particle', new THREE.BufferAttribute(new Float32Array(boxGeometry.attributes.position.array.length/3), 1));
+      g.setAttribute('bar', new THREE.BufferAttribute(new Float32Array(boxGeometry.attributes.position.array.length/3).fill(1), 1));
+      geometries.push(g);
+    }
+  }
+  // yz
+  for (let dy = 1; dy < numBars; dy++) {
+    for (let dz = 1; dz < numBars; dz++) {
+      const g = boxGeometry.clone()
+        .applyMatrix4(new THREE.Matrix4().makeScale(w, 0.01, 0.01))
+        .applyMatrix4(new THREE.Matrix4().makeTranslation(0, dy/numBars * w, -w/2 + dz/numBars * w));
+      g.setAttribute('particle', new THREE.BufferAttribute(new Float32Array(boxGeometry.attributes.position.array.length/3), 1));
+      g.setAttribute('bar', new THREE.BufferAttribute(new Float32Array(boxGeometry.attributes.position.array.length/3).fill(1), 1));
+      geometries.push(g);
+    }
+  }
+
   for (let i = 0; i < 20; i++) {
     const width = 0.02;
     const height = 0.2;
@@ -241,6 +279,7 @@ const portalMesh = (() => {
       .applyMatrix4(new THREE.Matrix4().makeScale(width, height, width))
       .applyMatrix4(new THREE.Matrix4().makeTranslation(width/2 + (-1/2 + Math.random()) * w * (1-width/2), 0.3/2 + Math.random() * (1-width/2), height/2 + (-1/2 + Math.random()) * w * (1-width/2)));
     g.setAttribute('particle', new THREE.BufferAttribute(new Float32Array(g.attributes.position.array.length/3).fill(1), 1));
+    g.setAttribute('bar', new THREE.BufferAttribute(new Float32Array(g.attributes.position.array.length/3), 1));
     geometries.push(g);
   }
   const geometry = BufferGeometryUtils.mergeBufferGeometries(geometries);
@@ -272,6 +311,7 @@ const portalMesh = (() => {
       attribute float skyLight;
       attribute float torchLight;
       attribute float particle;
+      attribute float bar;
 
       varying vec3 vViewPosition;
       varying vec2 vUv;
@@ -284,10 +324,13 @@ const portalMesh = (() => {
       varying vec3 vPos;
       varying vec3 vNormal;
       varying float vParticle;
+      varying float vBar;
 
       void main() {
         vec3 p = position;
-        p.y *= (1.0 + sin(uTime * PI*20.)*0.02) * min(max(2. - uDistance/4., 0.), 1.0);
+        if (bar < 1.0) { 
+          p.y *= (1.0 + sin(uTime * PI*20.)*0.02) * min(max(2. - uDistance/4., 0.), 1.0);
+        }
         p.y += 0.01;
         vec4 mvPosition = modelViewMatrix * vec4(p, 1.0);
         gl_Position = projectionMatrix * mvPosition;
@@ -345,6 +388,7 @@ const portalMesh = (() => {
         vPos = p;
         vNormal = normal;
         vParticle = particle;
+        vBar = bar;
       }
     `,
     fragmentShader: `\
@@ -372,6 +416,7 @@ const portalMesh = (() => {
       varying vec3 vPos;
       varying vec3 vNormal;
       varying float vParticle;
+      varying float vBar;
 
       float edgeFactor(vec2 uv) {
         float divisor = 0.5;
@@ -417,7 +462,15 @@ const portalMesh = (() => {
         float d = gl_FragCoord.z/gl_FragCoord.w;
         vec3 c = diffuseColor2; // mix(diffuseColor1, diffuseColor2, abs(vPos.y/10.));
         // float f2 = 1. + d/10.0;
-        gl_FragColor = vec4(c, vParticle > 0. ? 1. : max(f, 0.3));
+        float a;
+        if (vParticle > 0.) {
+          a = 1.;
+        } else if (vBar > 0.) {
+          a = 0.8;
+        } else {
+          a = max(f, 0.3);
+        }
+        gl_FragColor = vec4(c, a);
       }
     `,
     transparent: true,
