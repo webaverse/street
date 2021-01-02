@@ -251,6 +251,11 @@ const portalMesh = (() => {
         value: 0,
         // needsUpdate: true,
       },
+      uDistance: {
+        type: 'f',
+        value: 0,
+        // needsUpdate: true,
+      },
     },
     vertexShader: `\
       precision highp float;
@@ -260,6 +265,7 @@ const portalMesh = (() => {
 
       uniform vec4 uSelectRange;
       uniform float uTime;
+      uniform float uDistance;
 
       // attribute vec3 barycentric;
       attribute float ao;
@@ -281,7 +287,8 @@ const portalMesh = (() => {
 
       void main() {
         vec3 p = position;
-        p.y *= 1.0 + sin(uTime * PI*20.)*0.02;
+        p.y *= (1.0 + sin(uTime * PI*20.)*0.02) * min(max(2. - uDistance/4., 0.), 1.0);
+        p.y += 0.01;
         vec4 mvPosition = modelViewMatrix * vec4(p, 1.0);
         gl_Position = projectionMatrix * mvPosition;
 
@@ -884,6 +891,7 @@ renderer.setAnimationLoop(() => {
   particlesMesh.material.uniforms.uColor.value = f;
   particlesMesh.material.uniforms.uTime.value = (now%10000)/10000;
   portalMesh.material.uniforms.uTime.value = (now%1000)/1000;
+  portalMesh.material.uniforms.uDistance.value = position.distanceTo(portalMesh.position);
 
   if (beat) {
     const fd = analyser.getFrequencyData();
