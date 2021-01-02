@@ -659,7 +659,6 @@ const stacksMesh = (() => {
     // const quaternion = new THREE.Quaternion();
     const rng = alea('lol');
 
-    const s = 0.95;
     const floorGeometry = stacksFloorMesh.getObjectByName('Cube013').geometry.clone();
     const rampGeometry = stacksFloorMesh.getObjectByName('Cube013').geometry.clone()
       .applyMatrix4(new THREE.Matrix4().makeRotationFromQuaternion(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(1, 0, 0), Math.PI/4)))
