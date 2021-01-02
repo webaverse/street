@@ -1272,11 +1272,7 @@ const stacksMesh = (() => {
 
     const geometries = [];
     const _mergeMesh = (m, p, q) => {
-      /* if (!m.geometry) {
-        debugger;
-      } */
       const g = m.geometry.clone();
-      // g.applyMatrix4(m.matrixWorld);
       g.applyMatrix4(new THREE.Matrix4().compose(
         p.clone()
           .add(new THREE.Vector3(0, (((p.x + p.z) / w) % 2) === 0 ? 0.001 : 0, 0)), // slight offset to remove y glitching
