@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import {GLTFLoader} from 'GLTFLoader';
 import {BufferGeometryUtils} from 'BufferGeometryUtils';
 import {scene, renderer, camera, runtime, world, physics, ui, rig, app, appManager} from 'app';
 import Simplex from './simplex-noise.js';
@@ -32,6 +33,7 @@ const localRaycaster = new THREE.Raycaster();
 const localRay = new THREE.Ray();
 const localColor = new THREE.Color();
 const localColor2 = new THREE.Color();
+const gltfLoader = new GLTFLoader();
 
 class MultiSimplex {
   constructor(seed, octaves) {
@@ -203,6 +205,24 @@ const streetMesh = (() => {
 streetMesh.position.set(0, -1/2, 0);
 app.object.add(streetMesh);
 
+(async () => {
+  const videophoneMesh = await new Promise((accept, reject) => {
+    gltfLoader.load(`https://webaverse.github.io/street-assets/videophone.glb`, function(object) {
+      // console.log('loaded', object);
+      object = object.scene;
+      // object.scale.multiplyScalar(3);
+      // object.position.y = 2;
+      // window.object = object;
+      // scene.add( object );
+      // app.object.add(object);
+
+      accept(object);
+      // render();
+    }, function progress() {}, reject);
+  });
+  videophoneMesh.position.set(3, 0, 0);
+  app.object.add(videophoneMesh);
+})();
 /* function mod(a, n) {
   return ((a%n)+n)%n;
 }
