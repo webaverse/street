@@ -1260,48 +1260,121 @@ const stacksMesh = (() => {
         quaternion: new THREE.Quaternion(),
       },
     };
-    const testMap = [
-      [0, 0, 1, 1, 1],
-      [0, 1, 0, 1, 1],
-      [0, 1, 0, 1, 0],
-      [1, 1, 1, 1, 0],
-      [0, 0, 1, 1, 1],
-      [0, 0, 1, 1, 1],
-    ];
-    const width = testMap[0].length;
-    const height = testMap.length;
-    for (let dx = 1; dx < width; dx++) {
-      for (let dz = 0; dz < height; dz++) {
-        if (testMap[dz][dx]) {
-          const up = (testMap[dz - 1] || [])[dx] || 0;
-          const left = (testMap[dz] || [])[dx - 1] || 0;
-          const right = (testMap[dz] || [])[dx + 1] || 0;
-          const down = (testMap[dz + 1] || [])[dx] || 0;
-          
-          const j = [
-            [0, up, 0],
-            [left, 1, right],
-            [0, down, 0],
+    for (let dy = 0; dy < 10; dy++) {
+      const width = 2 + Math.floor(rng() * 10);
+      const height = 2 + Math.floor(rng() * 10);
+      const testMap = Array(height);
+      for (let i = 0; i < height; i++) {
+        testMap[i] = Array(width).fill(0);
+      }
+      const [
+        startPoint,
+        startPoint2,
+      ] = (() => {
+        const r = rng();
+        if (r < 0.25) { // left
+          const v = new THREE.Vector2(-1, Math.floor(rng() * height));
+          return [
+            v,
+            v.clone().add(new THREE.Vector2(1, 0)),
           ];
-          const s = JSON.stringify(j);
-          const entry = floorMap[s];
-          
-          if (entry) {
-            const o = modularMesh.getObjectByName(entry.name);
-            if (o) {
-              const m = o.clone();
-              m.position.x = dx*w;
-              m.position.z = dz*w;
-              
-              m.position.x += 10;
+        } else if (r < 0.5) { // right
+          const v = new THREE.Vector2(width, Math.floor(rng() * height));
+          return [
+            v,
+            v.clone().add(new THREE.Vector2(-1, 0)),
+          ];
+        } else if (r < 0.75) { // up
+          const v = new THREE.Vector2(Math.floor(rng() * width), -1);
+          return [
+            v,
+            v.clone().add(new THREE.Vector2(0, 1)),
+          ];
+        } else { // down
+          const v = new THREE.Vector2(Math.floor(rng() * width), height);
+          return [
+            v,
+            v.clone().add(new THREE.Vector2(0, -1)),
+          ];
+        }
+      })();
+      const _walkTestMap = () => {
+        const walkLength = Math.floor(1 + rng() * width * height);
+        const position = startPoint2.clone();
+        for (let i = 0; i < walkLength; i++) {
+          if (position.x >= testMap[position.y].length) {
+            debugger;
+          }
+          testMap[position.y][position.x] = 1;
+          const r = rng();
+          if (r < 0.25) { // left
+            position.x = Math.max(position.x - 1, 0);
+          } else if (r < 0.5) { // right
+            position.x = Math.min(position.x + 1, width - 1);
+          } else if (r < 0.75) { // up
+            position.y = Math.max(position.y - 1, 0);
+          } else { // down
+            position.y = Math.min(position.y + 1, height - 1);
+          }
+        }
+      };
+      _walkTestMap();
 
-              m.quaternion.premultiply(entry.quaternion);
-              mesh.add(m);
+      /* if (dy !== 1) {
+        continue;
+      } */
+
+      const _printTestMap = testMap => {
+        // console.log(startPoint2.toArray().join('/'));
+        console.log(testMap.map(l => l.join(',')).join('\n'));
+      };
+      _printTestMap(testMap);
+
+      const _getTestMap = (x, z) => {
+        if (x === startPoint.x && z === startPoint.y) {
+          return 1;
+        } else {
+          return (testMap[z] || [])[x] || 0;
+        }
+      };
+      for (let dx = 0; dx < width; dx++) {
+        for (let dz = 0; dz < height; dz++) {
+          // console.log('get test map', dx, dz);
+          if (_getTestMap(dx, dz)) {
+            const up = _getTestMap(dx, dz - 1);
+            const left = _getTestMap(dx - 1, dz);
+            const right = _getTestMap(dx + 1, dz);
+            const down = _getTestMap(dx, dz + 1);
+            
+            const j = [
+              [0, up, 0],
+              [left, 1, right],
+              [0, down, 0],
+            ];
+            const s = JSON.stringify(j);
+            const entry = floorMap[s];
+            
+            if (entry) {
+              /* if (entry.name === 'Floor') {
+                debugger;
+              } */
+              const o = modularMesh.getObjectByName(entry.name);
+              if (o) {
+                const m = o.clone();
+                m.position.x = dx*w;
+                m.position.y = dy*w;
+                m.position.z = dz*w;
+                
+                m.position.x += 10;
+
+                m.quaternion.premultiply(entry.quaternion);
+                mesh.add(m);
+              } else {
+                debugger;
+              }
             } else {
               debugger;
             }
-          } else {
-            debugger;
           }
         }
       }
