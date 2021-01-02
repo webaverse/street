@@ -225,17 +225,22 @@ const w = 4;
   app.object.add(videophoneMesh);
 })();
 const portalMesh = (() => {
-  const geometries = [
-    new THREE.PlaneBufferGeometry(w, w)
-      .applyMatrix4(new THREE.Matrix4().makeRotationFromQuaternion(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(1, 0, 0), -Math.PI/2))),
-  ];
+  const planeGeometry = new THREE.PlaneBufferGeometry(w, w, w, w)
+    .applyMatrix4(new THREE.Matrix4().makeRotationFromQuaternion(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(1, 0, 0), -Math.PI/2)));
+  for (let i = 0; i < planeGeometry.attributes.position.array.length; i += 3) {
+    planeGeometry.attributes.position.array[i+1] = Math.random() * 0.2;
+  }
+  planeGeometry.setAttribute('particle', new THREE.BufferAttribute(new Float32Array(planeGeometry.attributes.position.array.length/3), 1));
+
+  const geometries = [planeGeometry];
   const boxGeometry = new THREE.BoxBufferGeometry(1, 1, 1);
   for (let i = 0; i < 20; i++) {
     const width = 0.05;
     const height = 0.2;
     const g = boxGeometry.clone()
       .applyMatrix4(new THREE.Matrix4().makeScale(width, height, width))
-      .applyMatrix4(new THREE.Matrix4().makeTranslation(-1/2 + width/2 + Math.random() * w * (1-width/2), 0.3/2 + Math.random() * (1-width/2), -1/2 + height/2 + Math.random() * w * (1-width/2)));
+      .applyMatrix4(new THREE.Matrix4().makeTranslation(width/2 + (-1/2 + Math.random()) * w * (1-width/2), 0.3/2 + Math.random() * (1-width/2), height/2 + (-1/2 + Math.random()) * w * (1-width/2)));
+    g.setAttribute('particle', new THREE.BufferAttribute(new Float32Array(g.attributes.position.array.length/3).fill(1), 1));
     geometries.push(g);
   }
   const geometry = BufferGeometryUtils.mergeBufferGeometries(geometries);
@@ -260,6 +265,7 @@ const portalMesh = (() => {
       attribute float ao;
       attribute float skyLight;
       attribute float torchLight;
+      attribute float particle;
 
       varying vec3 vViewPosition;
       varying vec2 vUv;
@@ -271,6 +277,7 @@ const portalMesh = (() => {
       varying vec2 vWorldUv;
       varying vec3 vPos;
       varying vec3 vNormal;
+      varying float vParticle;
 
       void main() {
         vec3 p = position;
@@ -330,6 +337,7 @@ const portalMesh = (() => {
 
         vPos = p;
         vNormal = normal;
+        vParticle = particle;
       }
     `,
     fragmentShader: `\
@@ -356,6 +364,7 @@ const portalMesh = (() => {
       varying vec2 vWorldUv;
       varying vec3 vPos;
       varying vec3 vNormal;
+      varying float vParticle;
 
       float edgeFactor(vec2 uv) {
         float divisor = 0.5;
@@ -380,8 +389,7 @@ const portalMesh = (() => {
       }
 
       void main() {
-        // vec3 diffuseColor1 = vec3(${new THREE.Color(0x1976d2).toArray().join(', ')});
-        vec3 diffuseColor2 = vec3(${new THREE.Color(0x64b5f6).toArray().join(', ')});
+        vec3 diffuseColor2 = vec3(${new THREE.Color(0xffa726).toArray().join(', ')});
         float normalRepeat = 1.0;
 
         vec3 blending = getTriPlanarBlend(vNormal);
@@ -395,22 +403,19 @@ const portalMesh = (() => {
         // float f = edgeFactor();
         // float f = max(normalTex.x, normalTex.y, normalTex.z);
 
-        /* if (abs(length(vViewPosition) - uTime * 20.) < 0.1) {
+        /* if (vPos.y > 0.) {
           f = 1.0;
         } */
-        if (vPos.y > 0.) {
-          f = 1.0;
-        }
 
         float d = gl_FragCoord.z/gl_FragCoord.w;
         vec3 c = diffuseColor2; // mix(diffuseColor1, diffuseColor2, abs(vPos.y/10.));
-        float f2 = 1. + d/10.0;
-        gl_FragColor = vec4(c, max(f, 0.3) * f2);
+        // float f2 = 1. + d/10.0;
+        gl_FragColor = vec4(c, vParticle > 0. ? 1. : max(f, 0.3));
       }
     `,
     transparent: true,
-    polygonOffset: true,
-    polygonOffsetFactor: -1,
+    // polygonOffset: true,
+    // polygonOffsetFactor: -1,
     // polygonOffsetUnits: 1,
   });
   const mesh = new THREE.Mesh(geometry, material);
