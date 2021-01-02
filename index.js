@@ -1267,7 +1267,7 @@ const stacksMesh = (() => {
         debugger;
       }
       const g = m.geometry.clone();
-      g.applyMatrix4(o.matrixWorld);
+      g.applyMatrix4(m.matrixWorld);
       g.applyMatrix4(new THREE.Matrix4().compose(
         p,
         q,
