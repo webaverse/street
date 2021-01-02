@@ -1376,7 +1376,7 @@ const stacksMesh = (() => {
               } */
               const o = modularMesh.getObjectByName(entry.name);
               if (o) {
-                _mergeMesh(o, new THREE.Vector3(dx*w, dy*w, dz*w), entry.quaternion);
+                _mergeMesh(o, new THREE.Vector3(dx*w + 10, dy*w, dz*w), entry.quaternion);
               } else {
                 debugger;
               }
