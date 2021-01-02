@@ -1278,7 +1278,8 @@ const stacksMesh = (() => {
       const g = m.geometry.clone();
       // g.applyMatrix4(m.matrixWorld);
       g.applyMatrix4(new THREE.Matrix4().compose(
-        p,
+        p.clone()
+          .add(new THREE.Vector3(0, (((p.x + p.z) / w) % 2) === 0 ? 0.001 : 0, 0)), // slight offset to remove y glitching
         q,
         localVector.set(1, 1, 1)
       ));
@@ -1385,7 +1386,7 @@ const stacksMesh = (() => {
               } */
               const o = modularMesh.getObjectByName(entry.name);
               if (o) {
-                _mergeMesh(o, new THREE.Vector3(dx*w + 10, dy*w, dz*w), entry.quaternion);
+                _mergeMesh(o, new THREE.Vector3(dx*w + w*3, dy*w, dz*w), entry.quaternion);
               } else {
                 debugger;
               }
