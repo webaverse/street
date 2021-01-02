@@ -635,438 +635,445 @@ const floorPhysicsId = physics.addBoxGeometry(streetMesh.position, streetMesh.qu
 
 const parcelSpecs = [];
 const stacksMesh = (() => {
-  const position = new THREE.Vector3();
-  // const quaternion = new THREE.Quaternion();
-  const rng = alea('lol');
+  const object = new THREE.Object3D();
 
   const w = 4;
-  const s = 0.95;
-  const floorGeometry = new THREE.BoxBufferGeometry(w, 0.1, w)
-    .applyMatrix4(new THREE.Matrix4().makeScale(s, s, s))
-    .applyMatrix4(new THREE.Matrix4().makeTranslation(0, 0.1/2, 0));
-  const rampGeometry = new THREE.BoxBufferGeometry(w, 0.1, w * Math.sqrt(2))
-    .applyMatrix4(new THREE.Matrix4().makeScale(s, s, s))
-    .applyMatrix4(new THREE.Matrix4().makeRotationFromQuaternion(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(1, 0, 0), Math.PI/4)))
-    .applyMatrix4(new THREE.Matrix4().makeTranslation(0, w/2, 0));
-  const wallGeometry = new THREE.BoxBufferGeometry(w, w, 0.1)
-    .applyMatrix4(new THREE.Matrix4().makeScale(s, s, s))
-    // .applyMatrix4(new THREE.Matrix4().makeRotationFromQuaternion(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(1, 0, 0), Math.PI)))
-    .applyMatrix4(new THREE.Matrix4().makeTranslation(0, w/2, -w/2 + 0.1/2));
+  const roadMesh = (() => {
+    const position = new THREE.Vector3();
+    // const quaternion = new THREE.Quaternion();
+    const rng = alea('lol');
 
-  const geometry = new THREE.BufferGeometry();
-  const positions = new Float32Array(1024 * 1024);
-  const normals = new Float32Array(1024 * 1024);
-  const indices = new Uint32Array(1024 * 1024);
-  let positionIndex = 0;
-  let normalIndex = 0;
-  let indexIndex = 0;
-  const _mergeGeometry = g => {
-    for (let i = 0; i < g.index.array.length; i++) {
-      indices[indexIndex++] = g.index.array[i] + positionIndex/3;
-    }
-    positions.set(g.attributes.position.array, positionIndex);
-    positionIndex += g.attributes.position.array.length;
-    normals.set(g.attributes.normal.array, normalIndex);
-    normalIndex += g.attributes.normal.array.length;
-  };
+    const s = 0.95;
+    const floorGeometry = new THREE.BoxBufferGeometry(w, 0.1, w)
+      .applyMatrix4(new THREE.Matrix4().makeScale(s, s, s))
+      .applyMatrix4(new THREE.Matrix4().makeTranslation(0, 0.1/2, 0));
+    const rampGeometry = new THREE.BoxBufferGeometry(w, 0.1, w * Math.sqrt(2))
+      .applyMatrix4(new THREE.Matrix4().makeScale(s, s, s))
+      .applyMatrix4(new THREE.Matrix4().makeRotationFromQuaternion(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(1, 0, 0), Math.PI/4)))
+      .applyMatrix4(new THREE.Matrix4().makeTranslation(0, w/2, 0));
+    const wallGeometry = new THREE.BoxBufferGeometry(w, w, 0.1)
+      .applyMatrix4(new THREE.Matrix4().makeScale(s, s, s))
+      // .applyMatrix4(new THREE.Matrix4().makeRotationFromQuaternion(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(1, 0, 0), Math.PI)))
+      .applyMatrix4(new THREE.Matrix4().makeTranslation(0, w/2, -w/2 + 0.1/2));
 
-  const _getKey = p => p.toArray().join(':');
+    const geometry = new THREE.BufferGeometry();
+    const positions = new Float32Array(1024 * 1024);
+    const normals = new Float32Array(1024 * 1024);
+    const indices = new Uint32Array(1024 * 1024);
+    let positionIndex = 0;
+    let normalIndex = 0;
+    let indexIndex = 0;
+    const _mergeGeometry = g => {
+      for (let i = 0; i < g.index.array.length; i++) {
+        indices[indexIndex++] = g.index.array[i] + positionIndex/3;
+      }
+      positions.set(g.attributes.position.array, positionIndex);
+      positionIndex += g.attributes.position.array.length;
+      normals.set(g.attributes.normal.array, normalIndex);
+      normalIndex += g.attributes.normal.array.length;
+    };
 
-  const numBuildings = 10;
-  const seenBuildings = {};
-  for (let i = 0; i < numBuildings; i++) {
-    let buildingSize, buildingPosition;
-    for (;;) {
-      buildingSize = new THREE.Vector3(
-        1 + Math.floor(rng() * 5),
-        1 + Math.floor(rng() * 10),
-        1 + Math.floor(rng() * 5),
-      );
-      buildingPosition = new THREE.Vector3(
-        Math.floor(-20 + rng() * 40),
-        0,
-        Math.floor(-20 + rng() * 40),
-      );
+    const _getKey = p => p.toArray().join(':');
 
-      const _fits = () => {
-        for (let dx = 0; dx < buildingSize.x; dx++) {
-          for (let dy = 0; dy < buildingSize.y; dy++) {
-            for (let dz = 0; dz < buildingSize.z; dz++) {
-              const ax = buildingPosition.x + dx;
-              const ay = buildingPosition.y + dy;
-              const az = buildingPosition.z + dz;
-              const k = _getKey(new THREE.Vector3(ax, ay, az).multiplyScalar(w));
-              if (!seenBuildings[k]) {
-                // nothing
-              } else {
-                return false;
+    const numBuildings = 10;
+    const seenBuildings = {};
+    for (let i = 0; i < numBuildings; i++) {
+      let buildingSize, buildingPosition;
+      for (;;) {
+        buildingSize = new THREE.Vector3(
+          1 + Math.floor(rng() * 5),
+          1 + Math.floor(rng() * 10),
+          1 + Math.floor(rng() * 5),
+        );
+        buildingPosition = new THREE.Vector3(
+          Math.floor(-20 + rng() * 40),
+          0,
+          Math.floor(-20 + rng() * 40),
+        );
+
+        const _fits = () => {
+          for (let dx = 0; dx < buildingSize.x; dx++) {
+            for (let dy = 0; dy < buildingSize.y; dy++) {
+              for (let dz = 0; dz < buildingSize.z; dz++) {
+                const ax = buildingPosition.x + dx;
+                const ay = buildingPosition.y + dy;
+                const az = buildingPosition.z + dz;
+                const k = _getKey(new THREE.Vector3(ax, ay, az).multiplyScalar(w));
+                if (!seenBuildings[k]) {
+                  // nothing
+                } else {
+                  return false;
+                }
               }
             }
           }
-        }
-        return true;
-      };
-      const _mark = () => {
-        for (let dx = 0; dx < buildingSize.x; dx++) {
-          for (let dy = 0; dy < buildingSize.y; dy++) {
-            for (let dz = 0; dz < buildingSize.z; dz++) {
-              const ax = buildingPosition.x + dx;
-              const ay = buildingPosition.y + dy;
-              const az = buildingPosition.z + dz;
-              const k = _getKey(new THREE.Vector3(ax, ay, az).multiplyScalar(w));
-              seenBuildings[k] = true;
+          return true;
+        };
+        const _mark = () => {
+          for (let dx = 0; dx < buildingSize.x; dx++) {
+            for (let dy = 0; dy < buildingSize.y; dy++) {
+              for (let dz = 0; dz < buildingSize.z; dz++) {
+                const ax = buildingPosition.x + dx;
+                const ay = buildingPosition.y + dy;
+                const az = buildingPosition.z + dz;
+                const k = _getKey(new THREE.Vector3(ax, ay, az).multiplyScalar(w));
+                seenBuildings[k] = true;
+              }
             }
           }
-        }
-      };
-      const _draw = () => {
-        for (let dx = 0; dx < buildingSize.x; dx++) {
-          for (let dy = 0; dy < buildingSize.y; dy++) {
-            const ax = buildingPosition.x + dx;
-            const ay = buildingPosition.y + dy;
-            const az = buildingPosition.z;
+        };
+        const _draw = () => {
+          for (let dx = 0; dx < buildingSize.x; dx++) {
+            for (let dy = 0; dy < buildingSize.y; dy++) {
+              const ax = buildingPosition.x + dx;
+              const ay = buildingPosition.y + dy;
+              const az = buildingPosition.z;
 
-            const g = wallGeometry.clone()
-              // .applyMatrix4(new THREE.Matrix4().makeRotationFromQuaternion(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), Math.PI)))
-              .applyMatrix4(new THREE.Matrix4().makeTranslation(ax * w, ay * w, az * w));
-            _mergeGeometry(g);
-            // for (let y = 0; y < buildingSize.y; y++) {
-              // for (let z = 0; z < buildingSize.z; z++) {
+              const g = wallGeometry.clone()
+                // .applyMatrix4(new THREE.Matrix4().makeRotationFromQuaternion(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), Math.PI)))
+                .applyMatrix4(new THREE.Matrix4().makeTranslation(ax * w, ay * w, az * w));
+              _mergeGeometry(g);
+              // for (let y = 0; y < buildingSize.y; y++) {
+                // for (let z = 0; z < buildingSize.z; z++) {
+                // }
               // }
-            // }
-          }
-          for (let dy = 0; dy < buildingSize.y; dy++) {
-            const ax = buildingPosition.x + dx;
-            const ay = buildingPosition.y + dy;
-            const az = buildingPosition.z + buildingSize.z - 1;
+            }
+            for (let dy = 0; dy < buildingSize.y; dy++) {
+              const ax = buildingPosition.x + dx;
+              const ay = buildingPosition.y + dy;
+              const az = buildingPosition.z + buildingSize.z - 1;
 
-            const g = wallGeometry.clone()
-              .applyMatrix4(new THREE.Matrix4().makeRotationFromQuaternion(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), Math.PI)))
-              .applyMatrix4(new THREE.Matrix4().makeTranslation(ax * w, ay * w, az * w));
-            _mergeGeometry(g);
-            // for (let y = 0; y < buildingSize.y; y++) {
-              // for (let z = 0; z < buildingSize.z; z++) {
+              const g = wallGeometry.clone()
+                .applyMatrix4(new THREE.Matrix4().makeRotationFromQuaternion(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), Math.PI)))
+                .applyMatrix4(new THREE.Matrix4().makeTranslation(ax * w, ay * w, az * w));
+              _mergeGeometry(g);
+              // for (let y = 0; y < buildingSize.y; y++) {
+                // for (let z = 0; z < buildingSize.z; z++) {
+                // }
               // }
-            // }
+            }
           }
-        }
-        for (let dz = 0; dz < buildingSize.z; dz++) {
-          for (let dy = 0; dy < buildingSize.y; dy++) {
-            const ax = buildingPosition.x;
-            const ay = buildingPosition.y + dy;
-            const az = buildingPosition.z + dz;
-
-            const g = wallGeometry.clone()
-              .applyMatrix4(new THREE.Matrix4().makeRotationFromQuaternion(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), Math.PI/2)))
-              .applyMatrix4(new THREE.Matrix4().makeTranslation(ax * w, ay * w, az * w));
-            _mergeGeometry(g);
-            // for (let y = 0; y < buildingSize.y; y++) {
-              // for (let z = 0; z < buildingSize.z; z++) {
-              // }
-            // }
-          }
-          for (let dy = 0; dy < buildingSize.y; dy++) {
-            const ax = buildingPosition.x + buildingSize.x - 1;
-            const ay = buildingPosition.y + dy;
-            const az = buildingPosition.z + dz;
-
-            const g = wallGeometry.clone()
-              .applyMatrix4(new THREE.Matrix4().makeRotationFromQuaternion(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), -Math.PI/2)))
-              .applyMatrix4(new THREE.Matrix4().makeTranslation(ax * w, ay * w, az * w));
-            _mergeGeometry(g);
-            // for (let y = 0; y < buildingSize.y; y++) {
-              // for (let z = 0; z < buildingSize.z; z++) {
-              // }
-            // }
-          }
-        }
-
-        // roof
-        for (let dx = 0; dx < buildingSize.x; dx++) {
           for (let dz = 0; dz < buildingSize.z; dz++) {
-            const ax = buildingPosition.x + dx;
-            const ay = buildingPosition.y + buildingSize.y;
-            const az = buildingPosition.z + dz;
+            for (let dy = 0; dy < buildingSize.y; dy++) {
+              const ax = buildingPosition.x;
+              const ay = buildingPosition.y + dy;
+              const az = buildingPosition.z + dz;
 
-            const g = floorGeometry.clone()
-              // .applyMatrix4(new THREE.Matrix4().makeRotationFromQuaternion(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), Math.PI)))
-              .applyMatrix4(new THREE.Matrix4().makeTranslation(ax * w, ay * w, az * w));
-            _mergeGeometry(g);
-            // for (let y = 0; y < buildingSize.y; y++) {
-              // for (let z = 0; z < buildingSize.z; z++) {
+              const g = wallGeometry.clone()
+                .applyMatrix4(new THREE.Matrix4().makeRotationFromQuaternion(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), Math.PI/2)))
+                .applyMatrix4(new THREE.Matrix4().makeTranslation(ax * w, ay * w, az * w));
+              _mergeGeometry(g);
+              // for (let y = 0; y < buildingSize.y; y++) {
+                // for (let z = 0; z < buildingSize.z; z++) {
+                // }
               // }
-            // }
+            }
+            for (let dy = 0; dy < buildingSize.y; dy++) {
+              const ax = buildingPosition.x + buildingSize.x - 1;
+              const ay = buildingPosition.y + dy;
+              const az = buildingPosition.z + dz;
+
+              const g = wallGeometry.clone()
+                .applyMatrix4(new THREE.Matrix4().makeRotationFromQuaternion(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), -Math.PI/2)))
+                .applyMatrix4(new THREE.Matrix4().makeTranslation(ax * w, ay * w, az * w));
+              _mergeGeometry(g);
+              // for (let y = 0; y < buildingSize.y; y++) {
+                // for (let z = 0; z < buildingSize.z; z++) {
+                // }
+              // }
+            }
           }
-        }
 
-        const r = rng();
-        if (r < 0.5) {
-          const parcelSpec = {
-            position: new THREE.Vector3((buildingPosition.x - 0.5) * w, (buildingPosition.y + buildingSize.y) * w, (buildingPosition.z - 0.5) * w),
-            size: new THREE.Vector3(buildingSize.x * w, 0, buildingSize.z * w),
-          };
-          parcelSpecs.push(parcelSpec);
-        }
-      };
-      if (_fits()) {
-        _mark();
-        _draw();
-        break;
-      } else {
-        continue;
-      }
-    }
-  }
+          // roof
+          for (let dx = 0; dx < buildingSize.x; dx++) {
+            for (let dz = 0; dz < buildingSize.z; dz++) {
+              const ax = buildingPosition.x + dx;
+              const ay = buildingPosition.y + buildingSize.y;
+              const az = buildingPosition.z + dz;
 
-  const seenPositions = {};
+              const g = floorGeometry.clone()
+                // .applyMatrix4(new THREE.Matrix4().makeRotationFromQuaternion(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), Math.PI)))
+                .applyMatrix4(new THREE.Matrix4().makeTranslation(ax * w, ay * w, az * w));
+              _mergeGeometry(g);
+              // for (let y = 0; y < buildingSize.y; y++) {
+                // for (let z = 0; z < buildingSize.z; z++) {
+                // }
+              // }
+            }
+          }
 
-  const roadLength = 30;
-  let lastDirection = new THREE.Vector3();
-  let lastGeometryType = 'floor';
-  for (let i = 0; i < roadLength; i++) {
-    if (lastGeometryType === 'floor') {
-      const g = floorGeometry.clone();
-      g.applyMatrix4(new THREE.Matrix4().makeTranslation(position.x, position.y, position.z));
-      _mergeGeometry(g);
-    } else if (lastGeometryType === 'ramp') {
-      const g = rampGeometry.clone();
-      g.applyMatrix4(new THREE.Matrix4().makeRotationFromQuaternion(new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 0, -1), new THREE.Vector3(lastDirection.x, 0, lastDirection.z))));
-      g.applyMatrix4(new THREE.Matrix4().makeTranslation(position.x, position.y, position.z));
-      _mergeGeometry(g);
-    }
-
-    const k = _getKey(position);
-    seenPositions[k] = lastGeometryType;
-
-    if (lastGeometryType === 'ramp') {
-      position.y += w;
-    }
-
-    for (;;) {
-      let direction, geometryType;
-      if (lastGeometryType === 'floor') {
-        direction = (() => {
           const r = rng();
-          if (r < 1/4) {
-            return new THREE.Vector3(-1, 0, 0);
-          } else if (r < 2/4) {
-            return new THREE.Vector3(1, 0, 0);
-          } else if (r < 3/4) {
-            return new THREE.Vector3(0, 0, -1);
-          } else {
-            return new THREE.Vector3(0, 0, 1);
+          if (r < 0.5) {
+            const parcelSpec = {
+              position: new THREE.Vector3((buildingPosition.x - 0.5) * w, (buildingPosition.y + buildingSize.y) * w, (buildingPosition.z - 0.5) * w),
+              size: new THREE.Vector3(buildingSize.x * w, 0, buildingSize.z * w),
+            };
+            parcelSpecs.push(parcelSpec);
           }
-        })();
-        const r = rng();
-        if (r < 0.25) {
-          // direction.y += 0.5;
-          geometryType = 'ramp';
+        };
+        if (_fits()) {
+          _mark();
+          _draw();
+          break;
         } else {
-          geometryType = 'floor';
+          continue;
         }
-      } else {
-        const r = rng();
-        if (r < 0.5) { // end
-          direction = lastDirection.clone();
-          // direction.y = 0;
-          geometryType = 'floor';
-        } else { // continue
-          direction = lastDirection.clone();
-          geometryType = 'ramp';
-        }
-      }
-      // console.log('got direction', direction.toArray(), geometryType);
-
-      const nextPosition = position.clone().add(direction.clone().multiplyScalar(w));
-      const k = _getKey(nextPosition);
-      if (!seenPositions[k] && seenPositions[_getKey(nextPosition.clone().sub(new THREE.Vector3(0, w, 0)))] !== 'ramp') {
-        position.copy(nextPosition);
-        lastDirection = direction;
-        lastGeometryType = geometryType;
-        break;
-      } else {
-        continue;
       }
     }
-  }
-  // console.log('draw range', indices, indexIndex/3);
 
-  geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-  geometry.setAttribute('normal', new THREE.BufferAttribute(normals, 3));
-  geometry.setIndex(new THREE.BufferAttribute(indices, 1));
-  geometry.setDrawRange(0, indexIndex);
+    const seenPositions = {};
 
-  /* const material = new THREE.MeshBasicMaterial({
-    color: 0x9575cd,
-  }); */
-  const material = new THREE.ShaderMaterial({
-    uniforms: {
-      /* uTime: {
-        type: 'f',
-        value: 0,
-        needsUpdate: true,
-      }, */
-    },
-    vertexShader: `\
-      precision highp float;
-      precision highp int;
+    const roadLength = 30;
+    let lastDirection = new THREE.Vector3();
+    let lastGeometryType = 'floor';
+    for (let i = 0; i < roadLength; i++) {
+      if (lastGeometryType === 'floor') {
+        const g = floorGeometry.clone();
+        g.applyMatrix4(new THREE.Matrix4().makeTranslation(position.x, position.y, position.z));
+        _mergeGeometry(g);
+      } else if (lastGeometryType === 'ramp') {
+        const g = rampGeometry.clone();
+        g.applyMatrix4(new THREE.Matrix4().makeRotationFromQuaternion(new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 0, -1), new THREE.Vector3(lastDirection.x, 0, lastDirection.z))));
+        g.applyMatrix4(new THREE.Matrix4().makeTranslation(position.x, position.y, position.z));
+        _mergeGeometry(g);
+      }
 
-      uniform vec4 uSelectRange;
+      const k = _getKey(position);
+      seenPositions[k] = lastGeometryType;
 
-      // attribute vec3 barycentric;
-      attribute float ao;
-      attribute float skyLight;
-      attribute float torchLight;
+      if (lastGeometryType === 'ramp') {
+        position.y += w;
+      }
 
-      varying vec3 vViewPosition;
-      varying vec2 vUv;
-      varying vec3 vBarycentric;
-      varying float vAo;
-      varying float vSkyLight;
-      varying float vTorchLight;
-      varying vec3 vSelectColor;
-      varying vec2 vWorldUv;
-      varying vec3 vPos;
-      varying vec3 vNormal;
-
-      void main() {
-        vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
-        gl_Position = projectionMatrix * mvPosition;
-
-        vViewPosition = -mvPosition.xyz;
-        vUv = uv;
-        // vBarycentric = barycentric;
-        float vid = float(gl_VertexID);
-        if (mod(vid, 3.) < 0.5) {
-          vBarycentric = vec3(1., 0., 0.);
-        } else if (mod(vid, 3.) < 1.5) {
-          vBarycentric = vec3(0., 1., 0.);
-        } else {
-          vBarycentric = vec3(0., 0., 1.);
-        }
-        vAo = ao/27.0;
-        vSkyLight = skyLight/8.0;
-        vTorchLight = torchLight/8.0;
-
-        vSelectColor = vec3(0.);
-        if (
-          position.x >= uSelectRange.x &&
-          position.z >= uSelectRange.y &&
-          position.x < uSelectRange.z &&
-          position.z < uSelectRange.w
-        ) {
-          vSelectColor = vec3(${new THREE.Color(0x4fc3f7).toArray().join(', ')});
-        }
-
-        vec3 vert_tang;
-        vec3 vert_bitang;
-        if (abs(normal.y) < 0.05) {
-          if (abs(normal.x) > 0.95) {
-            vert_bitang = vec3(0., 1., 0.);
-            vert_tang = normalize(cross(vert_bitang, normal));
-            vWorldUv = vec2(dot(position, vert_tang), dot(position, vert_bitang));
+      for (;;) {
+        let direction, geometryType;
+        if (lastGeometryType === 'floor') {
+          direction = (() => {
+            const r = rng();
+            if (r < 1/4) {
+              return new THREE.Vector3(-1, 0, 0);
+            } else if (r < 2/4) {
+              return new THREE.Vector3(1, 0, 0);
+            } else if (r < 3/4) {
+              return new THREE.Vector3(0, 0, -1);
+            } else {
+              return new THREE.Vector3(0, 0, 1);
+            }
+          })();
+          const r = rng();
+          if (r < 0.25) {
+            // direction.y += 0.5;
+            geometryType = 'ramp';
           } else {
-            vert_bitang = vec3(0., 1., 0.);
-            vert_tang = normalize(cross(vert_bitang, normal));
-            vWorldUv = vec2(dot(position, vert_tang), dot(position, vert_bitang));
+            geometryType = 'floor';
           }
         } else {
-          vert_tang = vec3(1., 0., 0.);
-          vert_bitang = normalize(cross(vert_tang, normal));
-          vWorldUv = vec2(dot(position, vert_tang), dot(position, vert_bitang));
+          const r = rng();
+          if (r < 0.5) { // end
+            direction = lastDirection.clone();
+            // direction.y = 0;
+            geometryType = 'floor';
+          } else { // continue
+            direction = lastDirection.clone();
+            geometryType = 'ramp';
+          }
         }
-        vWorldUv /= 4.0;
-        vec3 vert_norm = normal;
+        // console.log('got direction', direction.toArray(), geometryType);
 
-        vec3 t = normalize(normalMatrix * vert_tang);
-        vec3 b = normalize(normalMatrix * vert_bitang);
-        vec3 n = normalize(normalMatrix * vert_norm);
-        mat3 tbn = transpose(mat3(t, b, n));
-
-        vPos = position;
-        vNormal = normal;
+        const nextPosition = position.clone().add(direction.clone().multiplyScalar(w));
+        const k = _getKey(nextPosition);
+        if (!seenPositions[k] && seenPositions[_getKey(nextPosition.clone().sub(new THREE.Vector3(0, w, 0)))] !== 'ramp') {
+          position.copy(nextPosition);
+          lastDirection = direction;
+          lastGeometryType = geometryType;
+          break;
+        } else {
+          continue;
+        }
       }
-    `,
-    fragmentShader: `\
-      precision highp float;
-      precision highp int;
+    }
+    // console.log('draw range', indices, indexIndex/3);
 
-      #define PI 3.1415926535897932384626433832795
+    geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+    geometry.setAttribute('normal', new THREE.BufferAttribute(normals, 3));
+    geometry.setIndex(new THREE.BufferAttribute(indices, 1));
+    geometry.setDrawRange(0, indexIndex);
 
-      uniform float sunIntensity;
-      uniform sampler2D tex;
-      // uniform float uTime;
-      uniform vec3 sunDirection;
-      float parallaxScale = 0.3;
-      float parallaxMinLayers = 50.;
-      float parallaxMaxLayers = 50.;
+    /* const material = new THREE.MeshBasicMaterial({
+      color: 0x9575cd,
+    }); */
+    const material = new THREE.ShaderMaterial({
+      uniforms: {
+        /* uTime: {
+          type: 'f',
+          value: 0,
+          needsUpdate: true,
+        }, */
+      },
+      vertexShader: `\
+        precision highp float;
+        precision highp int;
 
-      varying vec3 vViewPosition;
-      varying vec2 vUv;
-      varying vec3 vBarycentric;
-      varying float vAo;
-      varying float vSkyLight;
-      varying float vTorchLight;
-      varying vec3 vSelectColor;
-      varying vec2 vWorldUv;
-      varying vec3 vPos;
-      varying vec3 vNormal;
+        uniform vec4 uSelectRange;
 
-      float edgeFactor(vec2 uv) {
-        float divisor = 0.5;
-        float power = 0.5;
-        return min(
-          pow(abs(uv.x - round(uv.x/divisor)*divisor), power),
-          pow(abs(uv.y - round(uv.y/divisor)*divisor), power)
-        ) > 0.1 ? 0.0 : 1.0;
-        /* return 1. - pow(abs(uv.x - round(uv.x/divisor)*divisor), power) *
-          pow(abs(uv.y - round(uv.y/divisor)*divisor), power); */
-      }
+        // attribute vec3 barycentric;
+        attribute float ao;
+        attribute float skyLight;
+        attribute float torchLight;
 
-      vec3 getTriPlanarBlend(vec3 _wNorm){
-        // in wNorm is the world-space normal of the fragment
-        vec3 blending = abs( _wNorm );
-        // blending = normalize(max(blending, 0.00001)); // Force weights to sum to 1.0
-        // float b = (blending.x + blending.y + blending.z);
-        // blending /= vec3(b, b, b);
-        // return min(min(blending.x, blending.y), blending.z);
-        blending = normalize(blending);
-        return blending;
-      }
+        varying vec3 vViewPosition;
+        varying vec2 vUv;
+        varying vec3 vBarycentric;
+        varying float vAo;
+        varying float vSkyLight;
+        varying float vTorchLight;
+        varying vec3 vSelectColor;
+        varying vec2 vWorldUv;
+        varying vec3 vPos;
+        varying vec3 vNormal;
 
-      void main() {
-        // vec3 diffuseColor1 = vec3(${new THREE.Color(0x1976d2).toArray().join(', ')});
-        vec3 diffuseColor2 = vec3(${new THREE.Color(0x64b5f6).toArray().join(', ')});
-        float normalRepeat = 1.0;
+        void main() {
+          vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
+          gl_Position = projectionMatrix * mvPosition;
 
-        vec3 blending = getTriPlanarBlend(vNormal);
-        float xaxis = edgeFactor(vPos.yz * normalRepeat);
-        float yaxis = edgeFactor(vPos.xz * normalRepeat);
-        float zaxis = edgeFactor(vPos.xy * normalRepeat);
-        float f = xaxis * blending.x + yaxis * blending.y + zaxis * blending.z;
+          vViewPosition = -mvPosition.xyz;
+          vUv = uv;
+          // vBarycentric = barycentric;
+          float vid = float(gl_VertexID);
+          if (mod(vid, 3.) < 0.5) {
+            vBarycentric = vec3(1., 0., 0.);
+          } else if (mod(vid, 3.) < 1.5) {
+            vBarycentric = vec3(0., 1., 0.);
+          } else {
+            vBarycentric = vec3(0., 0., 1.);
+          }
+          vAo = ao/27.0;
+          vSkyLight = skyLight/8.0;
+          vTorchLight = torchLight/8.0;
 
-        // vec2 worldUv = vWorldUv;
-        // worldUv = mod(worldUv, 1.0);
-        // float f = edgeFactor();
-        // float f = max(normalTex.x, normalTex.y, normalTex.z);
+          vSelectColor = vec3(0.);
+          if (
+            position.x >= uSelectRange.x &&
+            position.z >= uSelectRange.y &&
+            position.x < uSelectRange.z &&
+            position.z < uSelectRange.w
+          ) {
+            vSelectColor = vec3(${new THREE.Color(0x4fc3f7).toArray().join(', ')});
+          }
 
-        /* if (abs(length(vViewPosition) - uTime * 20.) < 0.1) {
-          f = 1.0;
-        } */
+          vec3 vert_tang;
+          vec3 vert_bitang;
+          if (abs(normal.y) < 0.05) {
+            if (abs(normal.x) > 0.95) {
+              vert_bitang = vec3(0., 1., 0.);
+              vert_tang = normalize(cross(vert_bitang, normal));
+              vWorldUv = vec2(dot(position, vert_tang), dot(position, vert_bitang));
+            } else {
+              vert_bitang = vec3(0., 1., 0.);
+              vert_tang = normalize(cross(vert_bitang, normal));
+              vWorldUv = vec2(dot(position, vert_tang), dot(position, vert_bitang));
+            }
+          } else {
+            vert_tang = vec3(1., 0., 0.);
+            vert_bitang = normalize(cross(vert_tang, normal));
+            vWorldUv = vec2(dot(position, vert_tang), dot(position, vert_bitang));
+          }
+          vWorldUv /= 4.0;
+          vec3 vert_norm = normal;
 
-        float d = gl_FragCoord.z/gl_FragCoord.w;
-        vec3 c = diffuseColor2; // mix(diffuseColor1, diffuseColor2, abs(vPos.y/10.));
-        // float f2 = 1. + d/10.0;
-        gl_FragColor = vec4(c, 0.5 + max(f, 0.3));
-      }
-    `,
-    transparent: true,
-    // polygonOffset: true,
-    // polygonOffsetFactor: -1,
-    // polygonOffsetUnits: 1,
-  });
-  const mesh = new THREE.Mesh(geometry, material);
-  mesh.frustumCulled = false;
+          vec3 t = normalize(normalMatrix * vert_tang);
+          vec3 b = normalize(normalMatrix * vert_bitang);
+          vec3 n = normalize(normalMatrix * vert_norm);
+          mat3 tbn = transpose(mat3(t, b, n));
+
+          vPos = position;
+          vNormal = normal;
+        }
+      `,
+      fragmentShader: `\
+        precision highp float;
+        precision highp int;
+
+        #define PI 3.1415926535897932384626433832795
+
+        uniform float sunIntensity;
+        uniform sampler2D tex;
+        // uniform float uTime;
+        uniform vec3 sunDirection;
+        float parallaxScale = 0.3;
+        float parallaxMinLayers = 50.;
+        float parallaxMaxLayers = 50.;
+
+        varying vec3 vViewPosition;
+        varying vec2 vUv;
+        varying vec3 vBarycentric;
+        varying float vAo;
+        varying float vSkyLight;
+        varying float vTorchLight;
+        varying vec3 vSelectColor;
+        varying vec2 vWorldUv;
+        varying vec3 vPos;
+        varying vec3 vNormal;
+
+        float edgeFactor(vec2 uv) {
+          float divisor = 0.5;
+          float power = 0.5;
+          return min(
+            pow(abs(uv.x - round(uv.x/divisor)*divisor), power),
+            pow(abs(uv.y - round(uv.y/divisor)*divisor), power)
+          ) > 0.1 ? 0.0 : 1.0;
+          /* return 1. - pow(abs(uv.x - round(uv.x/divisor)*divisor), power) *
+            pow(abs(uv.y - round(uv.y/divisor)*divisor), power); */
+        }
+
+        vec3 getTriPlanarBlend(vec3 _wNorm){
+          // in wNorm is the world-space normal of the fragment
+          vec3 blending = abs( _wNorm );
+          // blending = normalize(max(blending, 0.00001)); // Force weights to sum to 1.0
+          // float b = (blending.x + blending.y + blending.z);
+          // blending /= vec3(b, b, b);
+          // return min(min(blending.x, blending.y), blending.z);
+          blending = normalize(blending);
+          return blending;
+        }
+
+        void main() {
+          // vec3 diffuseColor1 = vec3(${new THREE.Color(0x1976d2).toArray().join(', ')});
+          vec3 diffuseColor2 = vec3(${new THREE.Color(0x64b5f6).toArray().join(', ')});
+          float normalRepeat = 1.0;
+
+          vec3 blending = getTriPlanarBlend(vNormal);
+          float xaxis = edgeFactor(vPos.yz * normalRepeat);
+          float yaxis = edgeFactor(vPos.xz * normalRepeat);
+          float zaxis = edgeFactor(vPos.xy * normalRepeat);
+          float f = xaxis * blending.x + yaxis * blending.y + zaxis * blending.z;
+
+          // vec2 worldUv = vWorldUv;
+          // worldUv = mod(worldUv, 1.0);
+          // float f = edgeFactor();
+          // float f = max(normalTex.x, normalTex.y, normalTex.z);
+
+          /* if (abs(length(vViewPosition) - uTime * 20.) < 0.1) {
+            f = 1.0;
+          } */
+
+          float d = gl_FragCoord.z/gl_FragCoord.w;
+          vec3 c = diffuseColor2; // mix(diffuseColor1, diffuseColor2, abs(vPos.y/10.));
+          // float f2 = 1. + d/10.0;
+          gl_FragColor = vec4(c, 0.5 + max(f, 0.3));
+        }
+      `,
+      transparent: true,
+      // polygonOffset: true,
+      // polygonOffsetFactor: -1,
+      // polygonOffsetUnits: 1,
+    });
+    const mesh = new THREE.Mesh(geometry, material);
+    mesh.frustumCulled = false;
+    return mesh;
+  })();
+  object.add(roadMesh);
+  const roadPhysicsId = physics.addGeometry(roadMesh);
 
   (async () => {
     const signsMesh = await new Promise((accept, reject) => {
@@ -1116,6 +1123,8 @@ const stacksMesh = (() => {
   })();
 
   (async () => {
+    const rng = alea('lol');
+    
     const modularMesh = await new Promise((accept, reject) => {
       gltfLoader.load(`https://webaverse.github.io/street-assets/stacks.glb`, function(object) {
         // console.log('loaded', object);
@@ -1391,7 +1400,9 @@ const stacksMesh = (() => {
     const geometry = BufferGeometryUtils.mergeBufferGeometries(geometries);
     const material = modularMesh.getObjectByName('O').material;
     const modularMeshSingle = new THREE.Mesh(geometry, material);
-    mesh.add(modularMeshSingle);
+    modularMeshSingle.frustumCulled = false;
+    object.add(modularMeshSingle);
+    const modularPhysicsId = physics.addGeometry(modularMeshSingle);
   })();
   
   (async () => {
@@ -1410,14 +1421,12 @@ const stacksMesh = (() => {
       }, function progress() {}, reject);
     });
     
-    app.object.add(stacksFloorMesh);
+    object.add(stacksFloorMesh);
   })();
 
-  return mesh;
+  return object;
 })();
 app.object.add(stacksMesh);
-
-const stacksPhysicsId = physics.addGeometry(stacksMesh);
 
 (async () => {
   const sakuraMesh = await new Promise((accept, reject) => {
