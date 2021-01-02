@@ -640,7 +640,7 @@ const stacksMesh = (() => {
 
   (async () => {
     const stacksFloorMesh = await new Promise((accept, reject) => {
-      gltfLoader.load(`https://webaverse.github.io/street-assets/floor.glb`, function(object) {
+      gltfLoader.load(`./street-assets/fortnite.glb`, function(object) {
         // console.log('loaded', object);
         object = object.scene;
         // object.scale.multiplyScalar(3);
@@ -659,11 +659,15 @@ const stacksMesh = (() => {
     // const quaternion = new THREE.Quaternion();
     const rng = alea('lol');
 
-    const floorGeometry = stacksFloorMesh.getObjectByName('Cube013').geometry.clone();
-    const rampGeometry = stacksFloorMesh.getObjectByName('Cube013').geometry.clone()
+    // const s = 0.95;
+    const floorGeometry = stacksFloorMesh.getObjectByName('wood_floor').children[0].geometry.clone();
+    const rampGeometry = stacksFloorMesh.getObjectByName('wood_floor').children[0].geometry.clone()
+      .applyMatrix4(new THREE.Matrix4().makeScale(1, 1, Math.sqrt(2)))
       .applyMatrix4(new THREE.Matrix4().makeRotationFromQuaternion(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(1, 0, 0), Math.PI/4)))
       .applyMatrix4(new THREE.Matrix4().makeTranslation(0, w/2, 0));
-    const wallGeometry = stacksFloorMesh.getObjectByName('Cube013').geometry.clone()
+    const wallGeometry = stacksFloorMesh.getObjectByName('wood_wall').children[0].geometry.clone()
+      .applyMatrix4(new THREE.Matrix4().makeScale(1, 1.2, 1))
+      // .applyMatrix4(new THREE.Matrix4().makeRotationFromQuaternion(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(1, 0, 0), Math.PI/2)))
       .applyMatrix4(new THREE.Matrix4().makeTranslation(0, w/2, -w/2 + 0.1/2));
 
     const geometries = [];
@@ -1052,11 +1056,12 @@ const stacksMesh = (() => {
       // polygonOffsetFactor: -1,
       // polygonOffsetUnits: 1,
     }); */
-    const material = stacksFloorMesh.getObjectByName('Cube002').material;
+    
+    const material = stacksFloorMesh.getObjectByName('wood_doorframe').children[0].material;
     const roadMesh = new THREE.Mesh(geometry, material);
     roadMesh.frustumCulled = false;
     object.add(roadMesh);
-    const roadPhysicsId = physics.addGeometry(roadMesh);
+    // const roadPhysicsId = physics.addGeometry(roadMesh);
   })();
 
   (async () => {
