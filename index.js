@@ -295,6 +295,11 @@ const portalMesh = (() => {
         value: 0,
         // needsUpdate: true,
       },
+      uUserPosition: {
+        type: 'v3',
+        value: new THREE.Vector3(),
+        // needsUpdate: true,
+      },
     },
     vertexShader: `\
       precision highp float;
@@ -305,6 +310,7 @@ const portalMesh = (() => {
       uniform vec4 uSelectRange;
       uniform float uTime;
       uniform float uDistance;
+      uniform vec3 uUserPosition;
 
       // attribute vec3 barycentric;
       attribute float ao;
@@ -325,6 +331,7 @@ const portalMesh = (() => {
       varying vec3 vNormal;
       varying float vParticle;
       varying float vBar;
+      varying float vUserDelta;
 
       void main() {
         vec3 p = position;
@@ -389,6 +396,9 @@ const portalMesh = (() => {
         vNormal = normal;
         vParticle = particle;
         vBar = bar;
+        vUserDelta = length(
+          position - uUserPosition
+        );
       }
     `,
     fragmentShader: `\
@@ -417,6 +427,7 @@ const portalMesh = (() => {
       varying vec3 vNormal;
       varying float vParticle;
       varying float vBar;
+      varying float vUserDelta;
 
       float edgeFactor(vec2 uv) {
         float divisor = 0.5;
@@ -466,9 +477,12 @@ const portalMesh = (() => {
         if (vParticle > 0.) {
           a = 1.;
         } else if (vBar > 0.) {
-          a = 0.8;
+          a = 0.8 * (2.0 - vUserDelta);
         } else {
-          a = max(f, 0.3);
+          a = min(max(f, 0.3), 1.);
+        }
+        if (a < 0.) {
+          discard;
         }
         gl_FragColor = vec4(c, a);
       }
@@ -945,6 +959,7 @@ renderer.setAnimationLoop(() => {
   particlesMesh.material.uniforms.uTime.value = (now%10000)/10000;
   portalMesh.material.uniforms.uTime.value = (now%1000)/1000;
   portalMesh.material.uniforms.uDistance.value = position.distanceTo(portalMesh.position);
+  portalMesh.material.uniforms.uUserPosition.value.copy(position);
 
   if (beat) {
     const fd = analyser.getFrequencyData();
