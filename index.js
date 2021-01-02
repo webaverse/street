@@ -235,7 +235,7 @@ const portalMesh = (() => {
   const geometries = [planeGeometry];
   const boxGeometry = new THREE.BoxBufferGeometry(1, 1, 1);
   for (let i = 0; i < 20; i++) {
-    const width = 0.05;
+    const width = 0.02;
     const height = 0.2;
     const g = boxGeometry.clone()
       .applyMatrix4(new THREE.Matrix4().makeScale(width, height, width))
