@@ -1119,7 +1119,7 @@ const stacksMesh = (() => {
     });
     signMesh.add(english);
 
-    mesh.add(signMesh);
+    object.add(signMesh);
   })();
 
   (async () => {
