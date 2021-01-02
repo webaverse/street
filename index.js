@@ -637,7 +637,24 @@ const stacksMesh = (() => {
   const object = new THREE.Object3D();
 
   const w = 4;
-  const roadMesh = (() => {
+
+  (async () => {
+    const stacksFloorMesh = await new Promise((accept, reject) => {
+      gltfLoader.load(`https://webaverse.github.io/street-assets/floor.glb`, function(object) {
+        // console.log('loaded', object);
+        object = object.scene;
+        // object.scale.multiplyScalar(3);
+        // object.position.y = 2;
+        // window.object = object;
+        // scene.add( object );
+        // app.object.add(object);
+
+        accept(object);
+        // render();
+      }, function progress() {}, reject);
+    });
+    console.log('got', stacksFloorMesh);
+    
     const position = new THREE.Vector3();
     // const quaternion = new THREE.Quaternion();
     const rng = alea('lol');
@@ -898,16 +915,8 @@ const stacksMesh = (() => {
     geometry.setIndex(new THREE.BufferAttribute(indices, 1));
     geometry.setDrawRange(0, indexIndex);
 
-    /* const material = new THREE.MeshBasicMaterial({
-      color: 0x9575cd,
-    }); */
-    const material = new THREE.ShaderMaterial({
+    /* const material = new THREE.ShaderMaterial({
       uniforms: {
-        /* uTime: {
-          type: 'f',
-          value: 0,
-          needsUpdate: true,
-        }, */
       },
       vertexShader: `\
         precision highp float;
@@ -1021,8 +1030,6 @@ const stacksMesh = (() => {
             pow(abs(uv.x - round(uv.x/divisor)*divisor), power),
             pow(abs(uv.y - round(uv.y/divisor)*divisor), power)
           ) > 0.1 ? 0.0 : 1.0;
-          /* return 1. - pow(abs(uv.x - round(uv.x/divisor)*divisor), power) *
-            pow(abs(uv.y - round(uv.y/divisor)*divisor), power); */
         }
 
         vec3 getTriPlanarBlend(vec3 _wNorm){
@@ -1052,10 +1059,6 @@ const stacksMesh = (() => {
           // float f = edgeFactor();
           // float f = max(normalTex.x, normalTex.y, normalTex.z);
 
-          /* if (abs(length(vViewPosition) - uTime * 20.) < 0.1) {
-            f = 1.0;
-          } */
-
           float d = gl_FragCoord.z/gl_FragCoord.w;
           vec3 c = diffuseColor2; // mix(diffuseColor1, diffuseColor2, abs(vPos.y/10.));
           // float f2 = 1. + d/10.0;
@@ -1066,13 +1069,13 @@ const stacksMesh = (() => {
       // polygonOffset: true,
       // polygonOffsetFactor: -1,
       // polygonOffsetUnits: 1,
-    });
-    const mesh = new THREE.Mesh(geometry, material);
-    mesh.frustumCulled = false;
-    return mesh;
+    }); */
+    const material = stacksFloorMesh.getObjectByName('Cube002').material;
+    const roadMesh = new THREE.Mesh(geometry, material);
+    roadMesh.frustumCulled = false;
+    object.add(roadMesh);
+    const roadPhysicsId = physics.addGeometry(roadMesh);
   })();
-  object.add(roadMesh);
-  const roadPhysicsId = physics.addGeometry(roadMesh);
 
   (async () => {
     const signsMesh = await new Promise((accept, reject) => {
@@ -1125,7 +1128,7 @@ const stacksMesh = (() => {
     const rng = alea('lol');
     
     const modularMesh = await new Promise((accept, reject) => {
-      gltfLoader.load(`https://webaverse.github.io/street-assets/stacks.glb`, function(object) {
+      gltfLoader.load(`./street-assets/stacks.glb`, function(object) {
         // console.log('loaded', object);
         object = object.scene;
         // object.scale.multiplyScalar(3);
@@ -1341,7 +1344,7 @@ const stacksMesh = (() => {
       };
       _walkTestMap();
 
-      /* if (dy !== 1) {
+      /* if (dy !== 4) {
         continue;
       } */
 
@@ -1399,25 +1402,6 @@ const stacksMesh = (() => {
     modularMeshSingle.frustumCulled = false;
     object.add(modularMeshSingle);
     const modularPhysicsId = physics.addGeometry(modularMeshSingle);
-  })();
-  
-  (async () => {
-    const stacksFloorMesh = await new Promise((accept, reject) => {
-      gltfLoader.load(`https://webaverse.github.io/street-assets/floor.glb`, function(object) {
-        // console.log('loaded', object);
-        object = object.scene;
-        // object.scale.multiplyScalar(3);
-        // object.position.y = 2;
-        // window.object = object;
-        // scene.add( object );
-        // app.object.add(object);
-
-        accept(object);
-        // render();
-      }, function progress() {}, reject);
-    });
-    
-    object.add(stacksFloorMesh);
   })();
 
   return object;
