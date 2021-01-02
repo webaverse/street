@@ -310,7 +310,7 @@ const portalMesh = (() => {
       uniform vec4 uSelectRange;
       uniform float uTime;
       uniform float uDistance;
-      uniform vec3 uUserPosition;
+      // uniform vec3 uUserPosition;
 
       // attribute vec3 barycentric;
       attribute float ao;
@@ -319,7 +319,8 @@ const portalMesh = (() => {
       attribute float particle;
       attribute float bar;
 
-      varying vec3 vViewPosition;
+      // varying vec3 vViewPosition;
+      varying vec3 vModelPosition;
       varying vec2 vUv;
       varying vec3 vBarycentric;
       varying float vAo;
@@ -331,18 +332,19 @@ const portalMesh = (() => {
       varying vec3 vNormal;
       varying float vParticle;
       varying float vBar;
-      varying float vUserDelta;
+      // varying float vUserDelta;
 
       void main() {
         vec3 p = position;
-        if (bar < 1.0) { 
-          p.y *= (1.0 + sin(uTime * PI*20.)*0.02) * min(max(2. - uDistance/4., 0.), 1.0);
+        if (bar < 1.0) {
+          p.y *= (1.0 + sin(uTime * PI*20.)*0.02) * min(max(2. - uDistance/3., 0.), 1.0);
         }
         p.y += 0.01;
         vec4 mvPosition = modelViewMatrix * vec4(p, 1.0);
+        vModelPosition = (modelMatrix * vec4(p, 1.0)).xyz;
         gl_Position = projectionMatrix * mvPosition;
 
-        vViewPosition = -mvPosition.xyz;
+        // vViewPosition = -mvPosition.xyz;
         vUv = uv;
         // vBarycentric = barycentric;
         float vid = float(gl_VertexID);
@@ -396,9 +398,7 @@ const portalMesh = (() => {
         vNormal = normal;
         vParticle = particle;
         vBar = bar;
-        vUserDelta = length(
-          position - uUserPosition
-        );
+        // vUserDelta = max(abs(modelPosition.x - uUserPosition.x), abs(modelPosition.z - uUserPosition.z));
       }
     `,
     fragmentShader: `\
@@ -411,11 +411,13 @@ const portalMesh = (() => {
       uniform sampler2D tex;
       uniform float uTime;
       uniform vec3 sunDirection;
+      uniform vec3 uUserPosition;
       float parallaxScale = 0.3;
       float parallaxMinLayers = 50.;
       float parallaxMaxLayers = 50.;
 
-      varying vec3 vViewPosition;
+      // varying vec3 vViewPosition;
+      varying vec3 vModelPosition;
       varying vec2 vUv;
       varying vec3 vBarycentric;
       varying float vAo;
@@ -427,7 +429,7 @@ const portalMesh = (() => {
       varying vec3 vNormal;
       varying float vParticle;
       varying float vBar;
-      varying float vUserDelta;
+      // varying float vUserDelta;
 
       float edgeFactor(vec2 uv) {
         float divisor = 0.5;
@@ -477,7 +479,8 @@ const portalMesh = (() => {
         if (vParticle > 0.) {
           a = 1.;
         } else if (vBar > 0.) {
-          a = 0.8 * (2.0 - vUserDelta);
+          float userDelta = length(uUserPosition - vModelPosition);
+          a = 1.25 - userDelta;
         } else {
           a = min(max(f, 0.3), 1.);
         }
