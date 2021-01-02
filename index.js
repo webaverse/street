@@ -660,35 +660,17 @@ const stacksMesh = (() => {
     const rng = alea('lol');
 
     const s = 0.95;
-    const floorGeometry = new THREE.BoxBufferGeometry(w, 0.1, w)
-      .applyMatrix4(new THREE.Matrix4().makeScale(s, s, s))
-      .applyMatrix4(new THREE.Matrix4().makeTranslation(0, 0.1/2, 0));
-    const rampGeometry = new THREE.BoxBufferGeometry(w, 0.1, w * Math.sqrt(2))
-      .applyMatrix4(new THREE.Matrix4().makeScale(s, s, s))
+    const floorGeometry = stacksFloorMesh.getObjectByName('Cube013').geometry.clone();
+    const rampGeometry = stacksFloorMesh.getObjectByName('Cube013').geometry.clone()
       .applyMatrix4(new THREE.Matrix4().makeRotationFromQuaternion(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(1, 0, 0), Math.PI/4)))
       .applyMatrix4(new THREE.Matrix4().makeTranslation(0, w/2, 0));
-    const wallGeometry = new THREE.BoxBufferGeometry(w, w, 0.1)
-      .applyMatrix4(new THREE.Matrix4().makeScale(s, s, s))
-      // .applyMatrix4(new THREE.Matrix4().makeRotationFromQuaternion(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(1, 0, 0), Math.PI)))
+    const wallGeometry = stacksFloorMesh.getObjectByName('Cube013').geometry.clone()
       .applyMatrix4(new THREE.Matrix4().makeTranslation(0, w/2, -w/2 + 0.1/2));
 
-    const geometry = new THREE.BufferGeometry();
-    const positions = new Float32Array(1024 * 1024);
-    const normals = new Float32Array(1024 * 1024);
-    const indices = new Uint32Array(1024 * 1024);
-    let positionIndex = 0;
-    let normalIndex = 0;
-    let indexIndex = 0;
+    const geometries = [];
     const _mergeGeometry = g => {
-      for (let i = 0; i < g.index.array.length; i++) {
-        indices[indexIndex++] = g.index.array[i] + positionIndex/3;
-      }
-      positions.set(g.attributes.position.array, positionIndex);
-      positionIndex += g.attributes.position.array.length;
-      normals.set(g.attributes.normal.array, normalIndex);
-      normalIndex += g.attributes.normal.array.length;
+      geometries.push(g);
     };
-
     const _getKey = p => p.toArray().join(':');
 
     const numBuildings = 10;
@@ -910,10 +892,11 @@ const stacksMesh = (() => {
     }
     // console.log('draw range', indices, indexIndex/3);
 
-    geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+    const geometry = BufferGeometryUtils.mergeBufferGeometries(geometries);
+    /* geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
     geometry.setAttribute('normal', new THREE.BufferAttribute(normals, 3));
     geometry.setIndex(new THREE.BufferAttribute(indices, 1));
-    geometry.setDrawRange(0, indexIndex);
+    geometry.setDrawRange(0, indexIndex); */
 
     /* const material = new THREE.ShaderMaterial({
       uniforms: {
