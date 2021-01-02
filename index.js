@@ -1391,7 +1391,7 @@ const stacksMesh = (() => {
     const geometry = BufferGeometryUtils.mergeBufferGeometries(geometries);
     const material = modularMesh.getObjectByName('O').material;
     const modularMeshSingle = new THREE.Mesh(geometry, material);
-    mesh.add(modularMesh);
+    mesh.add(modularMeshSingle);
   })();
   
   (async () => {
