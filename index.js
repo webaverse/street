@@ -1260,6 +1260,22 @@ const stacksMesh = (() => {
         quaternion: new THREE.Quaternion(),
       },
     };
+
+    const geometries = [];
+    const _mergeMesh = (m, p, q) => {
+      if (!m.geometry) {
+        debugger;
+      }
+      const g = m.geometry.clone();
+      g.applyMatrix4(o.matrixWorld);
+      g.applyMatrix4(new THREE.Matrix4().compose(
+        p,
+        q,
+        localVector.set(1, 1, 1)
+      ));
+      geometries.push(g);
+    };
+
     for (let dy = 0; dy < 10; dy++) {
       const width = 2 + Math.floor(rng() * 10);
       const height = 2 + Math.floor(rng() * 10);
@@ -1360,15 +1376,7 @@ const stacksMesh = (() => {
               } */
               const o = modularMesh.getObjectByName(entry.name);
               if (o) {
-                const m = o.clone();
-                m.position.x = dx*w;
-                m.position.y = dy*w;
-                m.position.z = dz*w;
-                
-                m.position.x += 10;
-
-                m.quaternion.premultiply(entry.quaternion);
-                mesh.add(m);
+                _mergeMesh(o, new THREE.Vector3(dx*w, dy*w, dz*w), entry.quaternion);
               } else {
                 debugger;
               }
@@ -1380,7 +1388,10 @@ const stacksMesh = (() => {
       }
     }
 
-    // mesh.add(modularMesh);
+    const geometry = BufferGeometryUtils.mergeBufferGeometries(geometries);
+    const material = modularMesh.getObjectByName('O').material;
+    const modularMeshSingle = new THREE.Mesh(geometry, material);
+    mesh.add(modularMesh);
   })();
   
   (async () => {
