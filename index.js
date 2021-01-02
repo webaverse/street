@@ -31,11 +31,10 @@ const localQuaternion = new THREE.Quaternion();
 const localEuler = new THREE.Euler();
 const localMatrix = new THREE.Matrix4();
 // const localRaycaster = new THREE.Raycaster();
-const localRay = new THREE.Ray();
-const localColor = new THREE.Color();
-const localColor2 = new THREE.Color();
+// const localRay = new THREE.Ray();
+// const localColor = new THREE.Color();
+// const localColor2 = new THREE.Color();
 const gltfLoader = new GLTFLoader();
-
 
 class MultiSimplex {
   constructor(seed, octaves) {
