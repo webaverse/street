@@ -973,6 +973,21 @@ window.addEventListener('keydown', e => {
     }
   }
 });
+appManager.addEventListener('use', () => {
+  universe.enterWorld({
+    objects: [
+      {
+        position: [-3, 0, -10],
+        contentId: 'https://avaer.github.io/shield/index.js',
+      },
+    ],
+    extents: [
+      portalMesh.boundingBox.min.toArray(),
+      portalMesh.boundingBox.max.toArray(),
+    ],
+  });
+  // rootScene.visible = !rootScene.visible;
+});
 
 let lastUpdateTime = Date.now();
 const bpm = 1000*60/130;
