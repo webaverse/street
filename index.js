@@ -959,12 +959,17 @@ new THREE.AudioLoader().load(`https://avaer.github.io/assets-private/mnleo.mp3`,
 });
 const analyser = new THREE.AudioAnalyser(sound, 32);
 window.addEventListener('keydown', e => {
-  if (e.which === 77 && beatReady) { // M
-    beat = !beat;
-    if (beat) {
-      sound.play();
-    } else {
-      sound.pause();
+  switch (e.which) {
+    case 77: { // M
+      if (beatReady) {
+        beat = !beat;
+        if (beat) {
+          sound.play();
+        } else {
+          sound.pause();
+        }
+      }
+      break;
     }
   }
 });
