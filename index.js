@@ -224,7 +224,7 @@ const portalSpec = {
   objects: [
     {
       position: [-3, 0, -10],
-      contentId: 'https://avaer.github.io/shield/index.js',
+      contentId: 'https://webaverse.github.io/party/index.js',
     },
   ],
   extents: [
