@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import {GLTFLoader} from 'GLTFLoader';
 import {BufferGeometryUtils} from 'BufferGeometryUtils';
-import {renderer, camera, runtime, world, physics, ui, rig, app, appManager} from 'app';
+import {renderer, camera, runtime, world, universe, physics, ui, rig, app, appManager, popovers} from 'app';
 import Simplex from './simplex-noise.js';
 
 const parcelSize = 16;
@@ -501,9 +501,27 @@ const portalMesh = (() => {
     new THREE.Vector3(w/2, w, w/2),
   );
   mesh.frustumCulled = false;
+  mesh.popoverTarget = new THREE.Object3D();
+  mesh.popoverTarget.position.y = 2;
+  mesh.add(mesh.popoverTarget);
   return mesh;
 })();
 rootScene.add(portalMesh);
+
+const popoverWidth = 600;
+const popoverHeight = 200;
+const popoverTextMesh = (() => {
+  const textMesh = ui.makeTextMesh('Portal to 7 Starty Stacks.\n[E] to Enter', undefined, 0.5, 'center', 'middle');
+  textMesh.position.z = 0.1;
+  textMesh.scale.x = popoverHeight / popoverWidth;
+  textMesh.color = 0xFFFFFF;
+  return textMesh;
+})();
+const popoverMesh = popovers.addPopover(popoverTextMesh, {
+  width: popoverWidth,
+  height: popoverHeight,
+  target: portalMesh.popoverTarget,
+});
 
 /* function mod(a, n) {
   return ((a%n)+n)%n;
