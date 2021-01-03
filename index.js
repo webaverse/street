@@ -958,7 +958,7 @@ new THREE.AudioLoader().load(`https://avaer.github.io/assets-private/mnleo.mp3`,
   beatReady = true;
 });
 const analyser = new THREE.AudioAnalyser(sound, 32);
-window.addEventListener('keydown', e => {
+const _keydown = e => {
   switch (e.which) {
     case 77: { // M
       if (beatReady) {
@@ -972,7 +972,12 @@ window.addEventListener('keydown', e => {
       break;
     }
   }
+};
+window.addEventListener('keydown', _keydown);
+app.addEventListener('unload', () => {
+  window.removeEventListener('keydown', _keydown);
 });
+
 appManager.addEventListener('use', () => {
   universe.enterWorld({
     objects: [
