@@ -223,8 +223,8 @@ const w = 4;
 const portalSpec = {
   objects: [
     {
+      start_url: 'https://webaverse.github.io/party/index.js',
       position: [-3, 0, -10],
-      contentId: 'https://webaverse.github.io/party/index.js',
     },
   ],
   extents: [
