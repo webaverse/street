@@ -995,7 +995,6 @@ appManager.addEventListener('use', () => {
 });
 
 let lastUpdateTime = Date.now();
-const bpm = 1000*60/130;
 renderer.setAnimationLoop(() => {
   const now = Date.now();
 
