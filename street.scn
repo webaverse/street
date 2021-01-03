@@ -82,5 +82,17 @@
       ],
       "start_url": "https://webaverse.github.io/homespace/manifest.json"
     }
+  ],
+  "extents": [
+    [
+      -2,
+      0,
+      -2
+    ],
+    [
+      2,
+      4,
+      2
+    ]
   ]
 }
