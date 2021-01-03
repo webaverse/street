@@ -206,7 +206,7 @@ streetMesh.position.set(0, -1/2, 0);
 app.object.add(streetMesh);
 
 const w = 4;
-(async () => {
+/* (async () => {
   const videophoneMesh = await new Promise((accept, reject) => {
     gltfLoader.load(`https://webaverse.github.io/street-assets/videophone.glb`, function(object) {
       // console.log('loaded', object);
@@ -223,7 +223,7 @@ const w = 4;
   });
   videophoneMesh.position.set(3, 0, 0);
   app.object.add(videophoneMesh);
-})();
+})(); */
 const portalMesh = (() => {
   const geometries = [];
 
