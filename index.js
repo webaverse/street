@@ -220,296 +220,29 @@ const w = 4;
   videophoneMesh.position.set(3, 0, 0);
   rootScene.add(videophoneMesh);
 })(); */
-const portalMesh = (() => {
-  const geometries = [];
-
-  const planeGeometry = new THREE.PlaneBufferGeometry(w, w, w, w)
-    .applyMatrix4(new THREE.Matrix4().makeRotationFromQuaternion(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(1, 0, 0), -Math.PI/2)));
-  for (let i = 0; i < planeGeometry.attributes.position.array.length; i += 3) {
-    planeGeometry.attributes.position.array[i+1] = Math.random() * 0.2;
-  }
-  planeGeometry.setAttribute('particle', new THREE.BufferAttribute(new Float32Array(planeGeometry.attributes.position.array.length/3), 1));
-  planeGeometry.setAttribute('bar', new THREE.BufferAttribute(new Float32Array(planeGeometry.attributes.position.array.length/3), 1));
-  geometries.push(planeGeometry);
-
-  const boxGeometry = new THREE.BoxBufferGeometry(1, 1, 1);
-  const numBars = 10;
-  // xz
-  for (let dx = 1; dx < numBars; dx++) {
-    for (let dz = 1; dz < numBars; dz++) {
-      const g = boxGeometry.clone()
-        .applyMatrix4(new THREE.Matrix4().makeScale(0.01, w, 0.01))
-        .applyMatrix4(new THREE.Matrix4().makeTranslation(-w/2 + dx/numBars * w, w/2, -w/2 + dz/numBars * w));
-      g.setAttribute('particle', new THREE.BufferAttribute(new Float32Array(boxGeometry.attributes.position.array.length/3), 1));
-      g.setAttribute('bar', new THREE.BufferAttribute(new Float32Array(boxGeometry.attributes.position.array.length/3).fill(1), 1));
-      geometries.push(g);
-    }
-  }
-  // xy
-  for (let dx = 1; dx < numBars; dx++) {
-    for (let dy = 1; dy < numBars; dy++) {
-      const g = boxGeometry.clone()
-        .applyMatrix4(new THREE.Matrix4().makeScale(0.01, 0.01, w))
-        .applyMatrix4(new THREE.Matrix4().makeTranslation(-w/2 + dx/numBars * w, dy/numBars * w, 0));
-      g.setAttribute('particle', new THREE.BufferAttribute(new Float32Array(boxGeometry.attributes.position.array.length/3), 1));
-      g.setAttribute('bar', new THREE.BufferAttribute(new Float32Array(boxGeometry.attributes.position.array.length/3).fill(1), 1));
-      geometries.push(g);
-    }
-  }
-  // yz
-  for (let dy = 1; dy < numBars; dy++) {
-    for (let dz = 1; dz < numBars; dz++) {
-      const g = boxGeometry.clone()
-        .applyMatrix4(new THREE.Matrix4().makeScale(w, 0.01, 0.01))
-        .applyMatrix4(new THREE.Matrix4().makeTranslation(0, dy/numBars * w, -w/2 + dz/numBars * w));
-      g.setAttribute('particle', new THREE.BufferAttribute(new Float32Array(boxGeometry.attributes.position.array.length/3), 1));
-      g.setAttribute('bar', new THREE.BufferAttribute(new Float32Array(boxGeometry.attributes.position.array.length/3).fill(1), 1));
-      geometries.push(g);
-    }
-  }
-
-  for (let i = 0; i < 20; i++) {
-    const width = 0.02;
-    const height = 0.2;
-    const g = boxGeometry.clone()
-      .applyMatrix4(new THREE.Matrix4().makeScale(width, height, width))
-      .applyMatrix4(new THREE.Matrix4().makeTranslation(width/2 + (-1/2 + Math.random()) * w * (1-width/2), 0.3/2 + Math.random() * (1-width/2), height/2 + (-1/2 + Math.random()) * w * (1-width/2)));
-    g.setAttribute('particle', new THREE.BufferAttribute(new Float32Array(g.attributes.position.array.length/3).fill(1), 1));
-    g.setAttribute('bar', new THREE.BufferAttribute(new Float32Array(g.attributes.position.array.length/3), 1));
-    geometries.push(g);
-  }
-  const geometry = BufferGeometryUtils.mergeBufferGeometries(geometries);
-  const material = new THREE.ShaderMaterial({
-    uniforms: {
-      uTime: {
-        type: 'f',
-        value: 0,
-        // needsUpdate: true,
-      },
-      uDistance: {
-        type: 'f',
-        value: 0,
-        // needsUpdate: true,
-      },
-      uUserPosition: {
-        type: 'v3',
-        value: new THREE.Vector3(),
-        // needsUpdate: true,
-      },
+const portalSpec = {
+  objects: [
+    {
+      position: [-3, 0, -10],
+      contentId: 'https://avaer.github.io/shield/index.js',
     },
-    vertexShader: `\
-      precision highp float;
-      precision highp int;
-
-      #define PI 3.1415926535897932384626433832795
-
-      uniform vec4 uSelectRange;
-      uniform float uTime;
-      uniform float uDistance;
-      // uniform vec3 uUserPosition;
-
-      // attribute vec3 barycentric;
-      attribute float ao;
-      attribute float skyLight;
-      attribute float torchLight;
-      attribute float particle;
-      attribute float bar;
-
-      // varying vec3 vViewPosition;
-      varying vec3 vModelPosition;
-      varying vec2 vUv;
-      varying vec3 vBarycentric;
-      varying float vAo;
-      varying float vSkyLight;
-      varying float vTorchLight;
-      varying vec3 vSelectColor;
-      varying vec2 vWorldUv;
-      varying vec3 vPos;
-      varying vec3 vNormal;
-      varying float vParticle;
-      varying float vBar;
-      // varying float vUserDelta;
-
-      void main() {
-        vec3 p = position;
-        if (bar < 1.0) {
-          p.y *= (1.0 + sin(uTime * PI*10.)*0.02) * min(max(1. - uDistance/3., 0.), 1.0);
-        }
-        p.y += 0.01;
-        vec4 mvPosition = modelViewMatrix * vec4(p, 1.0);
-        vModelPosition = (modelMatrix * vec4(p, 1.0)).xyz;
-        gl_Position = projectionMatrix * mvPosition;
-
-        // vViewPosition = -mvPosition.xyz;
-        vUv = uv;
-        // vBarycentric = barycentric;
-        float vid = float(gl_VertexID);
-        if (mod(vid, 3.) < 0.5) {
-          vBarycentric = vec3(1., 0., 0.);
-        } else if (mod(vid, 3.) < 1.5) {
-          vBarycentric = vec3(0., 1., 0.);
-        } else {
-          vBarycentric = vec3(0., 0., 1.);
-        }
-        vAo = ao/27.0;
-        vSkyLight = skyLight/8.0;
-        vTorchLight = torchLight/8.0;
-
-        vSelectColor = vec3(0.);
-        if (
-          position.x >= uSelectRange.x &&
-          position.z >= uSelectRange.y &&
-          position.x < uSelectRange.z &&
-          position.z < uSelectRange.w
-        ) {
-          vSelectColor = vec3(${new THREE.Color(0x4fc3f7).toArray().join(', ')});
-        }
-
-        vec3 vert_tang;
-        vec3 vert_bitang;
-        if (abs(normal.y) < 0.05) {
-          if (abs(normal.x) > 0.95) {
-            vert_bitang = vec3(0., 1., 0.);
-            vert_tang = normalize(cross(vert_bitang, normal));
-            vWorldUv = vec2(dot(position, vert_tang), dot(position, vert_bitang));
-          } else {
-            vert_bitang = vec3(0., 1., 0.);
-            vert_tang = normalize(cross(vert_bitang, normal));
-            vWorldUv = vec2(dot(position, vert_tang), dot(position, vert_bitang));
-          }
-        } else {
-          vert_tang = vec3(1., 0., 0.);
-          vert_bitang = normalize(cross(vert_tang, normal));
-          vWorldUv = vec2(dot(position, vert_tang), dot(position, vert_bitang));
-        }
-        vWorldUv /= 4.0;
-        vec3 vert_norm = normal;
-
-        vec3 t = normalize(normalMatrix * vert_tang);
-        vec3 b = normalize(normalMatrix * vert_bitang);
-        vec3 n = normalize(normalMatrix * vert_norm);
-        mat3 tbn = transpose(mat3(t, b, n));
-
-        vPos = p;
-        vNormal = normal;
-        vParticle = particle;
-        vBar = bar;
-        // vUserDelta = max(abs(modelPosition.x - uUserPosition.x), abs(modelPosition.z - uUserPosition.z));
-      }
-    `,
-    fragmentShader: `\
-      precision highp float;
-      precision highp int;
-
-      #define PI 3.1415926535897932384626433832795
-
-      uniform float sunIntensity;
-      uniform sampler2D tex;
-      uniform float uTime;
-      uniform vec3 sunDirection;
-      uniform float uDistance;
-      uniform vec3 uUserPosition;
-      float parallaxScale = 0.3;
-      float parallaxMinLayers = 50.;
-      float parallaxMaxLayers = 50.;
-
-      // varying vec3 vViewPosition;
-      varying vec3 vModelPosition;
-      varying vec2 vUv;
-      varying vec3 vBarycentric;
-      varying float vAo;
-      varying float vSkyLight;
-      varying float vTorchLight;
-      varying vec3 vSelectColor;
-      varying vec2 vWorldUv;
-      varying vec3 vPos;
-      varying vec3 vNormal;
-      varying float vParticle;
-      varying float vBar;
-      // varying float vUserDelta;
-
-      float edgeFactor(vec2 uv) {
-        float divisor = 0.5;
-        float power = 0.5;
-        return min(
-          pow(abs(uv.x - round(uv.x/divisor)*divisor), power),
-          pow(abs(uv.y - round(uv.y/divisor)*divisor), power)
-        ) > 0.1 ? 0.0 : 1.0;
-        /* return 1. - pow(abs(uv.x - round(uv.x/divisor)*divisor), power) *
-          pow(abs(uv.y - round(uv.y/divisor)*divisor), power); */
-      }
-
-      vec3 getTriPlanarBlend(vec3 _wNorm){
-        // in wNorm is the world-space normal of the fragment
-        vec3 blending = abs( _wNorm );
-        // blending = normalize(max(blending, 0.00001)); // Force weights to sum to 1.0
-        // float b = (blending.x + blending.y + blending.z);
-        // blending /= vec3(b, b, b);
-        // return min(min(blending.x, blending.y), blending.z);
-        blending = normalize(blending);
-        return blending;
-      }
-
-      void main() {
-        vec3 diffuseColor2 = vec3(${new THREE.Color(0xffa726).toArray().join(', ')});
-        float normalRepeat = 1.0;
-
-        vec3 blending = getTriPlanarBlend(vNormal);
-        float xaxis = edgeFactor(vPos.yz * normalRepeat);
-        float yaxis = edgeFactor(vPos.xz * normalRepeat);
-        float zaxis = edgeFactor(vPos.xy * normalRepeat);
-        float f = xaxis * blending.x + yaxis * blending.y + zaxis * blending.z;
-
-        // vec2 worldUv = vWorldUv;
-        // worldUv = mod(worldUv, 1.0);
-        // float f = edgeFactor();
-        // float f = max(normalTex.x, normalTex.y, normalTex.z);
-
-        /* if (vPos.y > 0.) {
-          f = 1.0;
-        } */
-
-        float d = gl_FragCoord.z/gl_FragCoord.w;
-        vec3 c = diffuseColor2; // mix(diffuseColor1, diffuseColor2, abs(vPos.y/10.));
-        // float f2 = 1. + d/10.0;
-        float a;
-        if (vParticle > 0.) {
-          a = 1.;
-        } else if (vBar > 0.) {
-          float userDelta = length(uUserPosition - vModelPosition);
-          a = 1.25 - userDelta;
-        } else {
-          a = min(max(f, 0.3), 1.);
-        }
-        if (uDistance <= 0.) {
-          c *= 0.5 + pow(1. - uTime, 3.);
-        }
-        if (a < 0.) {
-          discard;
-        }
-        gl_FragColor = vec4(c, a);
-      }
-    `,
-    transparent: true,
-    // polygonOffset: true,
-    // polygonOffsetFactor: -1,
-    // polygonOffsetUnits: 1,
-  });
-  const mesh = new THREE.Mesh(geometry, material);
-  mesh.boundingBox = new THREE.Box3(
-    new THREE.Vector3(-w/2, 0, -w/2),
-    new THREE.Vector3(w/2, w, w/2),
-  );
-  mesh.frustumCulled = false;
-  mesh.popoverTarget = new THREE.Object3D();
-  mesh.popoverTarget.position.y = 2;
-  mesh.add(mesh.popoverTarget);
-  return mesh;
-})();
-rootScene.add(portalMesh);
+  ],
+  extents: [
+    [-w/2, 0, -w/2],
+    [w/2, w, w/2],
+  ],
+};
+const s = JSON.stringify(portalSpec);
+const b = new Blob([s], {
+  type: 'application/json',
+});
+const u = URL.createObjectURL(b) + '/portal.url';
+world.addObject(u, null, new THREE.Vector3(), new THREE.Quaternion());
 
 const popoverWidth = 600;
 const popoverHeight = 200;
+const popoverTarget = new THREE.Object3D();
+popoverTarget.position.y = 2;
 const popoverTextMesh = (() => {
   const textMesh = ui.makeTextMesh('Portal to 7 Starty Stacks.\n[E] to Enter', undefined, 0.5, 'center', 'middle');
   textMesh.position.z = 0.1;
@@ -520,7 +253,7 @@ const popoverTextMesh = (() => {
 const popoverMesh = popovers.addPopover(popoverTextMesh, {
   width: popoverWidth,
   height: popoverHeight,
-  target: portalMesh.popoverTarget,
+  target: popoverTarget,
 });
 
 /* function mod(a, n) {
@@ -978,7 +711,7 @@ app.addEventListener('unload', () => {
   window.removeEventListener('keydown', _keydown);
 });
 
-appManager.addEventListener('use', () => {
+/* appManager.addEventListener('use', () => {
   universe.enterWorld({
     objects: [
       {
@@ -992,7 +725,7 @@ appManager.addEventListener('use', () => {
     ],
   });
   // rootScene.visible = !rootScene.visible;
-});
+}); */
 
 let lastUpdateTime = Date.now();
 renderer.setAnimationLoop(() => {
@@ -1006,9 +739,6 @@ renderer.setAnimationLoop(() => {
   // floorMesh.material.uniforms.uAnimation.value = (now%2000)/2000;
   particlesMesh.material.uniforms.uColor.value = f;
   particlesMesh.material.uniforms.uTime.value = (now%10000)/10000;
-  portalMesh.material.uniforms.uTime.value = (now%500)/500;
-  portalMesh.material.uniforms.uDistance.value = portalMesh.boundingBox.distanceToPoint(position);
-  portalMesh.material.uniforms.uUserPosition.value.copy(position);
 
   if (beat) {
     const fd = analyser.getFrequencyData();
