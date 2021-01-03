@@ -337,7 +337,7 @@ const portalMesh = (() => {
       void main() {
         vec3 p = position;
         if (bar < 1.0) {
-          p.y *= (1.0 + sin(uTime * PI*20.)*0.02) * min(max(2. - uDistance/3., 0.), 1.0);
+          p.y *= (1.0 + sin(uTime * PI*10.)*0.02) * min(max(1. - uDistance/3., 0.), 1.0);
         }
         p.y += 0.01;
         vec4 mvPosition = modelViewMatrix * vec4(p, 1.0);
@@ -411,6 +411,7 @@ const portalMesh = (() => {
       uniform sampler2D tex;
       uniform float uTime;
       uniform vec3 sunDirection;
+      uniform float uDistance;
       uniform vec3 uUserPosition;
       float parallaxScale = 0.3;
       float parallaxMinLayers = 50.;
@@ -484,6 +485,9 @@ const portalMesh = (() => {
         } else {
           a = min(max(f, 0.3), 1.);
         }
+        if (uDistance <= 0.) {
+          c *= 0.5 + pow(1. - uTime, 3.);
+        }
         if (a < 0.) {
           discard;
         }
@@ -496,6 +500,10 @@ const portalMesh = (() => {
     // polygonOffsetUnits: 1,
   });
   const mesh = new THREE.Mesh(geometry, material);
+  mesh.boundingBox = new THREE.Box3(
+    new THREE.Vector3(-w/2, 0, -w/2),
+    new THREE.Vector3(w/2, w, w/2),
+  );
   mesh.frustumCulled = false;
   return mesh;
 })();
@@ -960,8 +968,8 @@ renderer.setAnimationLoop(() => {
   // floorMesh.material.uniforms.uAnimation.value = (now%2000)/2000;
   particlesMesh.material.uniforms.uColor.value = f;
   particlesMesh.material.uniforms.uTime.value = (now%10000)/10000;
-  portalMesh.material.uniforms.uTime.value = (now%1000)/1000;
-  portalMesh.material.uniforms.uDistance.value = position.distanceTo(portalMesh.position);
+  portalMesh.material.uniforms.uTime.value = (now%500)/500;
+  portalMesh.material.uniforms.uDistance.value = portalMesh.boundingBox.distanceToPoint(position);
   portalMesh.material.uniforms.uUserPosition.value.copy(position);
 
   if (beat) {
