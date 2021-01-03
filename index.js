@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import {GLTFLoader} from 'GLTFLoader';
 import {BufferGeometryUtils} from 'BufferGeometryUtils';
-import {scene, renderer, camera, runtime, world, physics, ui, rig, app, appManager} from 'app';
+import {renderer, camera, runtime, world, physics, ui, rig, app, appManager} from 'app';
 import Simplex from './simplex-noise.js';
 
 const parcelSize = 16;
@@ -34,6 +34,9 @@ const localRay = new THREE.Ray();
 const localColor = new THREE.Color();
 const localColor2 = new THREE.Color();
 const gltfLoader = new GLTFLoader();
+
+const rootScene = new THREE.Scene();
+app.object.add(rootScene);
 
 class MultiSimplex {
   constructor(seed, octaves) {
@@ -203,26 +206,19 @@ const streetMesh = (() => {
   return mesh;
 })();
 streetMesh.position.set(0, -1/2, 0);
-app.object.add(streetMesh);
+rootScene.add(streetMesh);
 
 const w = 4;
 /* (async () => {
   const videophoneMesh = await new Promise((accept, reject) => {
     gltfLoader.load(`https://webaverse.github.io/street-assets/videophone.glb`, function(object) {
-      // console.log('loaded', object);
       object = object.scene;
-      // object.scale.multiplyScalar(3);
-      // object.position.y = 2;
-      // window.object = object;
-      // scene.add( object );
-      // app.object.add(object);
 
       accept(object);
-      // render();
     }, function progress() {}, reject);
   });
   videophoneMesh.position.set(3, 0, 0);
-  app.object.add(videophoneMesh);
+  rootScene.add(videophoneMesh);
 })(); */
 const portalMesh = (() => {
   const geometries = [];
@@ -507,7 +503,7 @@ const portalMesh = (() => {
   mesh.frustumCulled = false;
   return mesh;
 })();
-app.object.add(portalMesh);
+rootScene.add(portalMesh);
 
 /* function mod(a, n) {
   return ((a%n)+n)%n;
@@ -638,7 +634,7 @@ const floorMesh = (() => {
   return mesh;
 })();
 floorMesh.position.set(0, -0.02, 0);
-app.object.add(floorMesh); */
+rootScene.add(floorMesh); */
 
 const gridMesh = (() => {
   const geometry = (() => {
@@ -758,7 +754,7 @@ const gridMesh = (() => {
   return mesh;
 })();
 // gridMesh.position.set(0, -0.01, 0);
-app.object.add(gridMesh);
+rootScene.add(gridMesh);
 
 const particlesMesh = (() => {
   const numParticles = 30000;
@@ -924,7 +920,7 @@ const particlesMesh = (() => {
   mesh.frustumCulled = false;
   return mesh;
 })();
-app.object.add(particlesMesh);
+rootScene.add(particlesMesh);
 
 const physicsId = physics.addBoxGeometry(streetMesh.position, streetMesh.quaternion, new THREE.Vector3(streetSize.z, streetSize.y, streetSize.z).multiplyScalar(0.5), false);
 /* app.addEventListener('unload', () => {
@@ -934,7 +930,7 @@ const physicsId = physics.addBoxGeometry(streetMesh.position, streetMesh.quatern
 let beat = false;
 let beatReady = false;
 const listener = new THREE.AudioListener();
-app.object.add(listener);
+rootScene.add(listener);
 const sound = new THREE.Audio(listener);
 new THREE.AudioLoader().load(`https://avaer.github.io/assets-private/mnleo.mp3`, function( buffer ) {
   sound.setBuffer(buffer);
