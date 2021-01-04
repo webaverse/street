@@ -220,24 +220,6 @@ const w = 4;
   videophoneMesh.position.set(3, 0, 0);
   rootScene.add(videophoneMesh);
 })(); */
-const portalSpec = {
-  objects: [
-    {
-      start_url: 'https://webaverse.github.io/party/index.js',
-      position: [-3, 0, -10],
-    },
-  ],
-  extents: [
-    [-w/2, 0, -w/2],
-    [w/2, w, w/2],
-  ],
-};
-const s = JSON.stringify(portalSpec);
-const b = new Blob([s], {
-  type: 'application/json',
-});
-const u = URL.createObjectURL(b) + '/portal.url';
-world.addObject(u, null, new THREE.Vector3(), new THREE.Quaternion());
 
 const popoverWidth = 600;
 const popoverHeight = 200;
