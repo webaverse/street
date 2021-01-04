@@ -95,6 +95,21 @@
         1
       ],
       "start_url": "https://webaverse.github.io/party/party.url"
+    },
+    {
+      "position": [
+        8,
+        -2,
+        -5
+      ],
+      "quaternion": [
+        0,
+        -0.7071067811865475,
+        0,
+        0.7071067811865475
+      ],
+      "start_url": "https://webaverse.github.io/street-assets/station.glb",
+      "physics_url": "https://webaverse.github.io/street-assets/station.bin"
     }
   ],
   "extents": [
