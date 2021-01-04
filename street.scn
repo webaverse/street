@@ -52,7 +52,8 @@
         0,
         0.7071067811865475
       ],
-      "start_url": "https://avatar-models.exokit.org/model43.vrm"
+      "start_url": "https://avatar-models.exokit.org/model49.vrm",
+      "dynamic": true
     },
     {
       "position": [
@@ -66,7 +67,8 @@
         0,
         0.7071067811865475
       ],
-      "start_url": "https://webaverse.github.io/assets/male.vrm"
+      "start_url": "https://webaverse.github.io/assets/male.vrm",
+      "dynamic": true
     },
     {
       "position": [
@@ -81,6 +83,47 @@
         0.7071067811865475
       ],
       "start_url": "https://webaverse.github.io/homespace/manifest.json"
+    },
+    {
+      "position": [
+        6,
+        0.1,
+        -4
+      ],
+      "quaternion": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "start_url": "https://webaverse.github.io/party/party.url"
+    },
+    {
+      "position": [
+        8,
+        -2,
+        -5
+      ],
+      "quaternion": [
+        0,
+        -0.7071067811865475,
+        0,
+        0.7071067811865475
+      ],
+      "start_url": "https://webaverse.github.io/street-assets/station.glb",
+      "physics_url": "https://webaverse.github.io/street-assets/station.bin"
     }
+  ],
+  "extents": [
+    [
+      -2,
+      0,
+      -2
+    ],
+    [
+      2,
+      4,
+      2
+    ]
   ]
 }

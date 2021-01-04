@@ -1,6 +1,7 @@
 import * as THREE from 'three';
+import {GLTFLoader} from 'GLTFLoader';
 import {BufferGeometryUtils} from 'BufferGeometryUtils';
-import {scene, renderer, camera, runtime, world, physics, ui, rig, app, appManager} from 'app';
+import {renderer, camera, runtime, world, universe, physics, ui, rig, app, appManager, popovers} from 'app';
 import Simplex from './simplex-noise.js';
 
 const parcelSize = 16;
@@ -32,6 +33,10 @@ const localRaycaster = new THREE.Raycaster();
 const localRay = new THREE.Ray();
 const localColor = new THREE.Color();
 const localColor2 = new THREE.Color();
+const gltfLoader = new GLTFLoader();
+
+const rootScene = new THREE.Scene();
+app.object.add(rootScene);
 
 class MultiSimplex {
   constructor(seed, octaves) {
@@ -201,7 +206,37 @@ const streetMesh = (() => {
   return mesh;
 })();
 streetMesh.position.set(0, -1/2, 0);
-app.object.add(streetMesh);
+rootScene.add(streetMesh);
+
+const w = 4;
+/* (async () => {
+  const videophoneMesh = await new Promise((accept, reject) => {
+    gltfLoader.load(`https://webaverse.github.io/street-assets/videophone.glb`, function(object) {
+      object = object.scene;
+
+      accept(object);
+    }, function progress() {}, reject);
+  });
+  videophoneMesh.position.set(3, 0, 0);
+  rootScene.add(videophoneMesh);
+})(); */
+
+const popoverWidth = 600;
+const popoverHeight = 200;
+const popoverTarget = new THREE.Object3D();
+popoverTarget.position.set(6, 2, -4);
+const popoverTextMesh = (() => {
+  const textMesh = ui.makeTextMesh('Multiplayer hub.\n[E] to Enter', undefined, 0.5, 'center', 'middle');
+  textMesh.position.z = 0.1;
+  textMesh.scale.x = popoverHeight / popoverWidth;
+  textMesh.color = 0xFFFFFF;
+  return textMesh;
+})();
+const popoverMesh = popovers.addPopover(popoverTextMesh, {
+  width: popoverWidth,
+  height: popoverHeight,
+  target: popoverTarget,
+});
 
 /* function mod(a, n) {
   return ((a%n)+n)%n;
@@ -332,7 +367,7 @@ const floorMesh = (() => {
   return mesh;
 })();
 floorMesh.position.set(0, -0.02, 0);
-app.object.add(floorMesh); */
+rootScene.add(floorMesh); */
 
 const gridMesh = (() => {
   const geometry = (() => {
@@ -452,7 +487,7 @@ const gridMesh = (() => {
   return mesh;
 })();
 // gridMesh.position.set(0, -0.01, 0);
-app.object.add(gridMesh);
+rootScene.add(gridMesh);
 
 const particlesMesh = (() => {
   const numParticles = 30000;
@@ -618,7 +653,7 @@ const particlesMesh = (() => {
   mesh.frustumCulled = false;
   return mesh;
 })();
-app.object.add(particlesMesh);
+rootScene.add(particlesMesh);
 
 const physicsId = physics.addBoxGeometry(streetMesh.position, streetMesh.quaternion, new THREE.Vector3(streetSize.z, streetSize.y, streetSize.z).multiplyScalar(0.5), false);
 /* app.addEventListener('unload', () => {
@@ -628,7 +663,7 @@ const physicsId = physics.addBoxGeometry(streetMesh.position, streetMesh.quatern
 let beat = false;
 let beatReady = false;
 const listener = new THREE.AudioListener();
-app.object.add(listener);
+rootScene.add(listener);
 const sound = new THREE.Audio(listener);
 new THREE.AudioLoader().load(`https://avaer.github.io/assets-private/mnleo.mp3`, function( buffer ) {
   sound.setBuffer(buffer);
@@ -638,19 +673,43 @@ new THREE.AudioLoader().load(`https://avaer.github.io/assets-private/mnleo.mp3`,
   beatReady = true;
 });
 const analyser = new THREE.AudioAnalyser(sound, 32);
-window.addEventListener('keydown', e => {
-  if (e.which === 77 && beatReady) { // M
-    beat = !beat;
-    if (beat) {
-      sound.play();
-    } else {
-      sound.pause();
+const _keydown = e => {
+  switch (e.which) {
+    case 77: { // M
+      if (beatReady) {
+        beat = !beat;
+        if (beat) {
+          sound.play();
+        } else {
+          sound.pause();
+        }
+      }
+      break;
     }
   }
+};
+window.addEventListener('keydown', _keydown);
+app.addEventListener('unload', () => {
+  window.removeEventListener('keydown', _keydown);
 });
 
+/* appManager.addEventListener('use', () => {
+  universe.enterWorld({
+    objects: [
+      {
+        position: [-3, 0, -10],
+        contentId: 'https://avaer.github.io/shield/index.js',
+      },
+    ],
+    extents: [
+      portalMesh.boundingBox.min.toArray(),
+      portalMesh.boundingBox.max.toArray(),
+    ],
+  });
+  // rootScene.visible = !rootScene.visible;
+}); */
+
 let lastUpdateTime = Date.now();
-const bpm = 1000*60/130;
 renderer.setAnimationLoop(() => {
   const now = Date.now();
 
