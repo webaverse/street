@@ -224,9 +224,9 @@ const w = 4;
 const popoverWidth = 600;
 const popoverHeight = 200;
 const popoverTarget = new THREE.Object3D();
-popoverTarget.position.y = 2;
+popoverTarget.position.set(6, 2, -4);
 const popoverTextMesh = (() => {
-  const textMesh = ui.makeTextMesh('Portal to 7 Starty Stacks.\n[E] to Enter', undefined, 0.5, 'center', 'middle');
+  const textMesh = ui.makeTextMesh('Multiplayer hub.\n[E] to Enter', undefined, 0.5, 'center', 'middle');
   textMesh.position.z = 0.1;
   textMesh.scale.x = popoverHeight / popoverWidth;
   textMesh.color = 0xFFFFFF;
