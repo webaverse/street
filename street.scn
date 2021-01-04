@@ -52,7 +52,8 @@
         0,
         0.7071067811865475
       ],
-      "start_url": "https://avatar-models.exokit.org/model47.vrm"
+      "start_url": "https://avatar-models.exokit.org/model47.vrm",
+      "dynamic": true
     },
     {
       "position": [
