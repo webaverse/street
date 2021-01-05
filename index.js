@@ -1139,14 +1139,15 @@ const stacksMesh = (() => {
         // const maxManhattanDistance = localVector2D.set(0, 0).manhattanDistanceTo(localVector2D2.set(s/2, s/2));
 
         let geometry = new THREE.PlaneBufferGeometry(width, depth, width, depth)
-          .applyMatrix4(new THREE.Matrix4().makeRotationFromQuaternion(new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 0, 1), new THREE.Vector3(0, 1, 0))));
+          .applyMatrix4(new THREE.Matrix4().makeRotationFromQuaternion(new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 0, 1), new THREE.Vector3(0, 1, 0))))
+          .applyMatrix4(new THREE.Matrix4().makeTranslation(center.x, 0, center.y));
 
         for (let i = 0; i < geometry.attributes.position.array.length; i += 3) {
           const x = geometry.attributes.position.array[i];
           const z = geometry.attributes.position.array[i+2];
           const d = Math.abs(x); 
-          const f = Math.min(Math.max(d / 30, 0), 1)**2;
-          const y = Math.min(terrainSimplex.noise2D(x/500, z/500) * f * 30, 100);
+          const f = Math.min(Math.max((d - 5) / 30, 0), 1)**2;
+          const y = Math.min((10 + terrainSimplex.noise2D(x/500, z/500) * 10) * f, 100);
           // console.log('got distance', z, d/maxDistance);
           geometry.attributes.position.array[i+1] = y;
         }
@@ -1263,7 +1264,7 @@ const stacksMesh = (() => {
             // c.rb += vUv;
             // vec3 p = fwidth(vPosition);
             // vec3 p = vPosition;
-            c += vPosition.y / 10.;
+            c += vPosition.y / 30.;
             gl_FragColor = vec4(c, 1.);
           }
         `,
@@ -1273,7 +1274,7 @@ const stacksMesh = (() => {
       const mesh = new THREE.Mesh(geometry, material);
       return mesh;
     })();
-    terrainMesh.position.set(center.x, 0, center.y);
+    // terrainMesh.position.set(center.x, 0, center.y);
     object.add(terrainMesh);
   }
 
