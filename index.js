@@ -1087,7 +1087,7 @@ const stacksMesh = (() => {
     // const roadPhysicsId = physics.addGeometry(roadMesh);
   })();
 
-  (async () => {
+  /* (async () => {
     const signsMesh = await new Promise((accept, reject) => {
       gltfLoader.load(`https://webaverse.github.io/street-assets/sign.glb`, function(object) {
         object = object.scene;
@@ -1125,7 +1125,7 @@ const stacksMesh = (() => {
     signMesh.add(english);
 
     object.add(signMesh);
-  })();
+  })(); */
 
   (async () => {
     const rng = alea('lol');
