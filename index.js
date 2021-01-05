@@ -35,6 +35,14 @@ const gltfLoader = new GLTFLoader();
 const rootScene = new THREE.Scene();
 app.object.add(rootScene);
 
+/* const ambientLight = new THREE.AmbientLight(0xFFFFFF);
+rootScene.add(ambientLight);
+// rootScene.ambientLight = ambientLight;
+const directionalLight = new THREE.DirectionalLight(0xFFFFFF);
+directionalLight.position.set(1, 2, 3);
+rootScene.add(directionalLight);
+// rootScene.directionalLight = directionalLight; */
+
 class MultiSimplex {
   constructor(seed, octaves) {
     const simplexes = Array(octaves);
@@ -657,36 +665,33 @@ const stacksMesh = (() => {
   const w = 4;
 
   (async () => {
-    const stacksFloorMesh = await new Promise((accept, reject) => {
-      gltfLoader.load(`./street-assets/fortnite.glb`, function(object) {
-        // console.log('loaded', object);
+    const fortniteMesh = await new Promise((accept, reject) => {
+      gltfLoader.load(`https://webaverse.github.io/street-assets/fortnite.glb`, function(object) {
         object = object.scene;
-        // object.scale.multiplyScalar(3);
-        // object.position.y = 2;
-        // window.object = object;
-        // scene.add( object );
-        // app.object.add(object);
+        
+        object.traverse(o => {
+          if (o.isMesh) {
+            o.material.color.setHex(0x111111);
+          }
+        });
 
         accept(object);
-        // render();
       }, function progress() {}, reject);
     });
-    console.log('got', stacksFloorMesh);
+    const floorMesh = fortniteMesh.getObjectByName('floor');
+    const wallMesh = fortniteMesh.getObjectByName('wall');
+    const rampMesh = fortniteMesh.getObjectByName('ramp');
     
     const position = new THREE.Vector3();
     // const quaternion = new THREE.Quaternion();
     const rng = alea('lol');
 
     // const s = 0.95;
-    const floorGeometry = stacksFloorMesh.getObjectByName('wood_floor').children[0].geometry.clone();
-    const rampGeometry = stacksFloorMesh.getObjectByName('wood_floor').children[0].geometry.clone()
-      .applyMatrix4(new THREE.Matrix4().makeScale(1, 1, Math.sqrt(2)))
-      .applyMatrix4(new THREE.Matrix4().makeRotationFromQuaternion(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(1, 0, 0), Math.PI/4)))
-      .applyMatrix4(new THREE.Matrix4().makeTranslation(0, w/2, 0));
-    const wallGeometry = stacksFloorMesh.getObjectByName('wood_wall').children[0].geometry.clone()
-      .applyMatrix4(new THREE.Matrix4().makeScale(1, 1.2, 1))
-      // .applyMatrix4(new THREE.Matrix4().makeRotationFromQuaternion(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(1, 0, 0), Math.PI/2)))
-      .applyMatrix4(new THREE.Matrix4().makeTranslation(0, w/2, -w/2 + 0.1/2));
+    const floorGeometry = floorMesh.geometry.clone();
+    const wallGeometry = wallMesh.geometry.clone()
+      .applyMatrix4(new THREE.Matrix4().makeScale(1, 4/3, 1));
+    const rampGeometry = rampMesh.geometry.clone()
+      .applyMatrix4(new THREE.Matrix4().makeScale(1, 4/3, 1));
 
     const geometries = [];
     const _mergeGeometry = g => {
@@ -1075,7 +1080,7 @@ const stacksMesh = (() => {
       // polygonOffsetUnits: 1,
     }); */
     
-    const material = stacksFloorMesh.getObjectByName('wood_doorframe').children[0].material;
+    const material = floorMesh.material;
     const roadMesh = new THREE.Mesh(geometry, material);
     roadMesh.frustumCulled = false;
     object.add(roadMesh);
