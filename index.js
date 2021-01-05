@@ -206,17 +206,6 @@ streetMesh.position.set(0, -1/2, 0);
 rootScene.add(streetMesh);
 
 const w = 4;
-/* (async () => {
-  const videophoneMesh = await new Promise((accept, reject) => {
-    gltfLoader.load(`https://webaverse.github.io/street-assets/videophone.glb`, function(object) {
-      object = object.scene;
-
-      accept(object);
-    }, function progress() {}, reject);
-  });
-  videophoneMesh.position.set(3, 0, 0);
-  rootScene.add(videophoneMesh);
-})(); */
 
 const popoverWidth = 600;
 const popoverHeight = 200;
