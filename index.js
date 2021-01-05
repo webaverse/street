@@ -31,6 +31,7 @@ const localQuaternion = new THREE.Quaternion();
 const localEuler = new THREE.Euler();
 const localMatrix = new THREE.Matrix4();
 const gltfLoader = new GLTFLoader();
+const textureLoader = new THREE.TextureLoader();
 
 const rootScene = new THREE.Scene();
 app.object.add(rootScene);
@@ -1145,9 +1146,13 @@ const stacksMesh = (() => {
           const z = geometry.attributes.position.array[i+2];
           const d = Math.abs(x); 
           const f = Math.min(Math.max((d - 5) / 30, 0), 1)**2;
-          const y = -0.01 + Math.min(Math.max(terrainSimplex.noise2D(x/500, z/500) * f * 30, 0), 100);
+          const y = Math.min(Math.max(terrainSimplex.noise2D(x/500, z/500) * f * 30, 0), 100);
           // console.log('got distance', z, d/maxDistance);
           geometry.attributes.position.array[i+1] = y;
+        }
+        for (let i = 0; i < geometry.attributes.uv.array.length; i += 2) {
+          geometry.attributes.uv.array[i] *= width;
+          geometry.attributes.uv.array[i+1] *= depth;
         }
         /* const dynamicPositionYs = new Float32Array(geometry.attributes.position.array.length/3);
         for (let i = 0; i < dynamicPositionYs.length; i += 3) {
@@ -1183,15 +1188,24 @@ const stacksMesh = (() => {
         return geometry;
       })();
 
+      const diffuse1 = textureLoader.load(`./street-assets/textures/Vol_17_2_Base_Color.png`);
+      diffuse1.wrapS = THREE.RepeatWrapping;
+      diffuse1.wrapT = THREE.RepeatWrapping;
+      diffuse1.anisotropy = 16;
+      const normal1 = textureLoader.load(`./street-assets/textures/Vol_17_2_Normal.png`);
+      normal1.wrapS = THREE.RepeatWrapping;
+      normal1.wrapT = THREE.RepeatWrapping;
+      normal1.anisotropy = 16;
+
       const material = new THREE.ShaderMaterial({
         uniforms: {
-          uBeat: {
-            type: 'f',
-            value: 1,
+          uDiffuse1: {
+            type: 't',
+            value: diffuse1,
           },
-          uBeat2: {
-            type: 'f',
-            value: 0,
+          uNormal1: {
+            type: 't',
+            value: normal1,
           },
         },
         vertexShader: `\
@@ -1201,26 +1215,27 @@ const stacksMesh = (() => {
           attribute vec3 barycentric;
           attribute float dynamicPositionY;
           uniform float uBeat2;
-          varying float vUv;
-          varying vec3 vBarycentric;
+          varying vec2 vUv;
+          // varying vec3 vBarycentric;
           varying vec3 vPosition;
 
           void main() {
-            vUv = uv.x;
-            vBarycentric = barycentric;
+            vUv = uv;
+            // vBarycentric = barycentric;
             vPosition = position;
             gl_Position = projectionMatrix * modelViewMatrix * vec4(position + vec3(0., dynamicPositionY * uBeat2, 0.), 1.0);
           }
         `,
         fragmentShader: `\
-          uniform float uBeat;
           precision highp float;
           precision highp int;
 
-          #define PI 3.1415926535897932384626433832795
+          uniform sampler2D uDiffuse1;
+          uniform sampler2D uNormal1;
 
-          varying vec3 vBarycentric;
+          // varying vec3 vBarycentric;
           varying vec3 vPosition;
+          varying vec2 vUv;
 
           const vec3 lineColor1 = vec3(${new THREE.Color(0x66bb6a).toArray().join(', ')});
           const vec3 lineColor2 = vec3(${new THREE.Color(0x9575cd).toArray().join(', ')});
@@ -1233,13 +1248,11 @@ const stacksMesh = (() => {
           }
 
           void main() {
-            vec3 c = mix(lineColor1, lineColor2, vPosition.y / 10.);
+            // vec3 c = mix(lineColor1, lineColor2, vPosition.y / 10.);
+            vec3 c = texture2D(uDiffuse1, vUv).rgb;
+            // c.rb += vUv;
             // vec3 p = fwidth(vPosition);
-            vec3 p = vPosition;
-            float f = min(mod(p.x, 1.), mod(p.z, 1.));
-            f = min(f, mod(1.-p.x, 1.));
-            f = min(f, mod(1.-p.z, 1.));
-            f *= 10.;
+            // vec3 p = vPosition;
             gl_FragColor = vec4(c, 1.);
           }
         `,
