@@ -367,7 +367,7 @@ rootScene.add(floorMesh); */
 
 const stacksBoundingBox = new THREE.Box2(
   new THREE.Vector2(5, 0),
-  new THREE.Vector2(55, 50),
+  new THREE.Vector2(105, 100),
 );
 const gridMesh = (() => {
   const geometry = (() => {
@@ -1145,8 +1145,8 @@ const stacksMesh = (() => {
           const x = geometry.attributes.position.array[i];
           const z = geometry.attributes.position.array[i+2];
           const d = Math.abs(x); 
-          const f = Math.min(Math.max((d - 5) / 30, 0), 1)**2;
-          const y = Math.min(Math.max(terrainSimplex.noise2D(x/500, z/500) * f * 30, 0), 100);
+          const f = Math.min(Math.max(d / 30, 0), 1)**2;
+          const y = Math.min(terrainSimplex.noise2D(x/500, z/500) * f * 30, 100);
           // console.log('got distance', z, d/maxDistance);
           geometry.attributes.position.array[i+1] = y;
         }
@@ -1168,6 +1168,8 @@ const stacksMesh = (() => {
           dynamicPositionYs[i+2] = y;
         }
         geometry.setAttribute('dynamicPositionY', new THREE.BufferAttribute(dynamicPositionYs, 1)); */
+        
+        geometry.computeVertexNormals();
 
         geometry = geometry.toNonIndexed();
         /* const barycentrics = new Float32Array(geometry.attributes.position.array.length);
@@ -1188,11 +1190,13 @@ const stacksMesh = (() => {
         return geometry;
       })();
 
-      const diffuse1 = textureLoader.load(`./street-assets/textures/Vol_17_2_Base_Color.png`);
+      const prefix = 'Vol_21_4';
+
+      const diffuse1 = textureLoader.load(`./street-assets/textures/${prefix}_Base_Color.png`);
       diffuse1.wrapS = THREE.RepeatWrapping;
       diffuse1.wrapT = THREE.RepeatWrapping;
       diffuse1.anisotropy = 16;
-      const normal1 = textureLoader.load(`./street-assets/textures/Vol_17_2_Normal.png`);
+      const normal1 = textureLoader.load(`./street-assets/textures/${prefix}_Normal.png`);
       normal1.wrapS = THREE.RepeatWrapping;
       normal1.wrapT = THREE.RepeatWrapping;
       normal1.anisotropy = 16;
@@ -1213,17 +1217,19 @@ const stacksMesh = (() => {
 
           attribute float y;
           attribute vec3 barycentric;
-          attribute float dynamicPositionY;
-          uniform float uBeat2;
+          // attribute float dynamicPositionY;
+          // uniform float uBeat2;
+          varying vec3 vNormal;
           varying vec2 vUv;
           // varying vec3 vBarycentric;
           varying vec3 vPosition;
 
           void main() {
-            vUv = uv;
+            vUv = uv / 4.;
+            vNormal = normal;
             // vBarycentric = barycentric;
             vPosition = position;
-            gl_Position = projectionMatrix * modelViewMatrix * vec4(position + vec3(0., dynamicPositionY * uBeat2, 0.), 1.0);
+            gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
           }
         `,
         fragmentShader: `\
@@ -1236,6 +1242,7 @@ const stacksMesh = (() => {
           // varying vec3 vBarycentric;
           varying vec3 vPosition;
           varying vec2 vUv;
+          varying vec3 vNormal;
 
           const vec3 lineColor1 = vec3(${new THREE.Color(0x66bb6a).toArray().join(', ')});
           const vec3 lineColor2 = vec3(${new THREE.Color(0x9575cd).toArray().join(', ')});
@@ -1250,9 +1257,13 @@ const stacksMesh = (() => {
           void main() {
             // vec3 c = mix(lineColor1, lineColor2, vPosition.y / 10.);
             vec3 c = texture2D(uDiffuse1, vUv).rgb;
+            vec3 n = texture2D(uNormal1, vUv).rgb * vNormal;
+            vec3 l = normalize(vec3(-1., -2., -3.));
+            c *= 0.5 + abs(dot(n, l));
             // c.rb += vUv;
             // vec3 p = fwidth(vPosition);
             // vec3 p = vPosition;
+            c += vPosition.y / 10.;
             gl_FragColor = vec4(c, 1.);
           }
         `,
