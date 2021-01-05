@@ -365,8 +365,8 @@ floorMesh.position.set(0, -0.02, 0);
 rootScene.add(floorMesh); */
 
 const stacksBoundingBox = new THREE.Box2(
-  new THREE.Vector2(0, 0),
-  new THREE.Vector2(50, 50),
+  new THREE.Vector2(5, 0),
+  new THREE.Vector2(55, 50),
 );
 const gridMesh = (() => {
   const geometry = (() => {
