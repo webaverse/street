@@ -884,12 +884,21 @@ const stacksMesh = (() => {
       if (lastGeometryType === 'floor') {
         const g = floorGeometry.clone();
         g.applyMatrix4(new THREE.Matrix4().makeTranslation(position.x, position.y, position.z));
-        _mergeGeometry(g);
+        _mergeGeometry(g, {
+          position,
+          quaternion: new THREE.Quaternion(),
+          scale: new THREE.Vector3(w, 0.1, w).divideScalar(2),
+        });
       } else if (lastGeometryType === 'ramp') {
         const g = rampGeometry.clone();
-        g.applyMatrix4(new THREE.Matrix4().makeRotationFromQuaternion(new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 0, -1), new THREE.Vector3(lastDirection.x, 0, lastDirection.z))));
+        const quaternion = new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 0, -1), new THREE.Vector3(lastDirection.x, 0, lastDirection.z));
+        g.applyMatrix4(new THREE.Matrix4().makeRotationFromQuaternion(quaternion));
         g.applyMatrix4(new THREE.Matrix4().makeTranslation(position.x, position.y, position.z));
-        _mergeGeometry(g);
+        _mergeGeometry(g, {
+          position: position.clone().add(new THREE.Vector3(0, w/2, 0)),
+          quaternion: quaternion.clone().premultiply(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(1, 0, 0), -Math.PI/4)),
+          scale: new THREE.Vector3(w, 0.1, Math.sqrt(2*(w**2))).divideScalar(2),
+        });
       }
 
       const k = _getKey(position);
