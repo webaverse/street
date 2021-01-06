@@ -1193,11 +1193,11 @@ const stacksMesh = (() => {
 
       const prefix = 'Vol_21_4';
 
-      const diffuse1 = textureLoader.load(`./street-assets/textures/${prefix}_Base_Color.png`);
+      const diffuse1 = textureLoader.load(`https://webaverse.github.io/street-assets/textures/${prefix}_Base_Color.png`);
       diffuse1.wrapS = THREE.RepeatWrapping;
       diffuse1.wrapT = THREE.RepeatWrapping;
       diffuse1.anisotropy = 16;
-      const normal1 = textureLoader.load(`./street-assets/textures/${prefix}_Normal.png`);
+      const normal1 = textureLoader.load(`https://webaverse.github.io/street-assets/textures/${prefix}_Normal.png`);
       normal1.wrapS = THREE.RepeatWrapping;
       normal1.wrapT = THREE.RepeatWrapping;
       normal1.anisotropy = 16;
@@ -1282,7 +1282,7 @@ const stacksMesh = (() => {
     const rng = alea('lol');
     
     const modularMesh = await new Promise((accept, reject) => {
-      gltfLoader.load(`./street-assets/stacks.glb`, function(object) {
+      gltfLoader.load(`https://webaverse.github.io/street-assets/stacks.glb`, function(object) {
         // console.log('loaded', object);
         object = object.scene;
         // object.scale.multiplyScalar(3);
