@@ -843,9 +843,12 @@ const stacksMesh = (() => {
               const az = buildingPosition.z + dz;
 
               const g = floorGeometry.clone()
-                // .applyMatrix4(new THREE.Matrix4().makeRotationFromQuaternion(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), Math.PI)))
                 .applyMatrix4(new THREE.Matrix4().makeTranslation(ax * w, ay * w, az * w));
-              _mergeGeometry(g);
+              _mergeGeometry(g, {
+                position: new THREE.Vector3(ax * w, ay * w, az * w),
+                quaternion: new THREE.Quaternion(),
+                scale: new THREE.Vector3(w, 0.1, w).divideScalar(2),
+              });
               // for (let y = 0; y < buildingSize.y; y++) {
                 // for (let z = 0; z < buildingSize.z; z++) {
                 // }
