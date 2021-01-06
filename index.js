@@ -1516,7 +1516,7 @@ const stacksMesh = (() => {
       const _printTestMap = testMap => {
         console.log(testMap.map(l => l.join(',')).join('\n'));
       };
-      _printTestMap(testMap);
+      // _printTestMap(testMap);
 
       const _getTestMap = (x, z) => {
         if (x === startPoint.x && z === startPoint.y) {
