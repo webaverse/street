@@ -1514,7 +1514,6 @@ const stacksMesh = (() => {
       } */
 
       const _printTestMap = testMap => {
-        // console.log(startPoint2.toArray().join('/'));
         console.log(testMap.map(l => l.join(',')).join('\n'));
       };
       _printTestMap(testMap);
@@ -1528,7 +1527,6 @@ const stacksMesh = (() => {
       };
       for (let dx = 0; dx < width; dx++) {
         for (let dz = 0; dz < height; dz++) {
-          // console.log('get test map', dx, dz);
           if (_getTestMap(dx, dz)) {
             const up = _getTestMap(dx, dz - 1);
             const left = _getTestMap(dx - 1, dz);
@@ -1544,9 +1542,6 @@ const stacksMesh = (() => {
             const entry = floorMap[s];
             
             if (entry) {
-              /* if (entry.name === 'Floor') {
-                debugger;
-              } */
               const o = modularMesh.getObjectByName(entry.name);
               if (o) {
                 _mergeMesh(o, new THREE.Vector3(dx*w + w*3, dy*w, dz*w), entry.quaternion);
