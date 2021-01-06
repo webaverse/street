@@ -74,10 +74,10 @@ const streetMesh = (() => {
         type: 'f',
         value: 0,
       },
-      uBeat: {
+      /* uBeat: {
         type: 'f',
         value: 1,
-      },
+      }, */
     },
     vertexShader: `\
       #define PI 3.1415926535897932384626433832795
@@ -95,7 +95,7 @@ const streetMesh = (() => {
       }
     `,
     fragmentShader: `\
-      uniform float uBeat;
+      // uniform float uBeat;
       varying vec3 vBarycentric;
       varying vec3 vPosition;
       uniform float uTime;
@@ -203,7 +203,7 @@ const streetMesh = (() => {
         vec3 p = mod(vec3(vPosition.x*0.99, vPosition.y, vPosition.z)/10. + 0.5, 1.);
         float section = floor(vPosition.z/10.);
         float f = pattern(p, section);
-        gl_FragColor = vec4(c * (f > 0.5 ? 1. : 0.2) * uBeat, 1.);
+        gl_FragColor = vec4(c * (f > 0.5 ? 1. : 0.2) /* * uBeat */, 1.);
       }
     `,
     side: THREE.DoubleSide,
@@ -422,14 +422,14 @@ const gridMesh = (() => {
 
   const material = new THREE.ShaderMaterial({
     uniforms: {
-      uBeat: {
+      /* uBeat: {
         type: 'f',
         value: 1,
       },
       uBeat2: {
         type: 'f',
         value: 0,
-      },
+      }, */
     },
     vertexShader: `\
       #define PI 3.1415926535897932384626433832795
@@ -437,7 +437,7 @@ const gridMesh = (() => {
       attribute float y;
       attribute vec3 barycentric;
       attribute float dynamicPositionY;
-      uniform float uBeat2;
+      // uniform float uBeat2;
       varying float vUv;
       varying vec3 vBarycentric;
       varying vec3 vPosition;
@@ -446,11 +446,11 @@ const gridMesh = (() => {
         vUv = uv.x;
         vBarycentric = barycentric;
         vPosition = position;
-        gl_Position = projectionMatrix * modelViewMatrix * vec4(position + vec3(0., dynamicPositionY * uBeat2, 0.), 1.0);
+        gl_Position = projectionMatrix * modelViewMatrix * vec4(position /* + vec3(0., dynamicPositionY * uBeat2, 0.) */, 1.0);
       }
     `,
     fragmentShader: `\
-      uniform float uBeat;
+      // uniform float uBeat;
       precision highp float;
       precision highp int;
 
@@ -477,7 +477,7 @@ const gridMesh = (() => {
         f = min(f, mod(1.-p.x, 1.));
         f = min(f, mod(1.-p.z, 1.));
         f *= 10.;
-        gl_FragColor = vec4(c * uBeat, /*0.7 + */max(1. - f, 0.));
+        gl_FragColor = vec4(c /* * uBeat */, /*0.7 + */max(1. - f, 0.));
       }
     `,
     side: THREE.DoubleSide,
@@ -558,14 +558,14 @@ const particlesMesh = (() => {
         type: 'f',
         value: 0,
       },
-      uBeat: {
+      /* uBeat: {
         type: 'f',
         value: 0,
       },
       uBeat2: {
         type: 'f',
         value: 0,
-      },
+      }, */
       uTime: {
         type: 'f',
         value: 0,
@@ -594,7 +594,7 @@ const particlesMesh = (() => {
       }
 
       uniform float uTime;
-      uniform float uBeat2;
+      // uniform float uBeat2;
       // attribute float y;
       attribute vec3 offset;
       attribute vec3 barycentric;
@@ -608,7 +608,7 @@ const particlesMesh = (() => {
         // vUv = uv.x;
         vBarycentric = barycentric;
         // vPosition = position;
-        vec3 p = position * (1. + uBeat2);
+        vec3 p = position /* * (1. + uBeat2) */;
         vec3 o = offset + dynamicPosition * mod(timeOffset + uTime, 1.);
         o -= cameraPosition;
         o = mod(o, ${spread.toFixed(8)});
@@ -624,7 +624,7 @@ const particlesMesh = (() => {
       #define PI 3.1415926535897932384626433832795
 
       uniform float uColor;
-      uniform float uBeat;
+      // uniform float uBeat;
       varying vec3 vBarycentric;
       // varying vec3 vPosition;
 
@@ -642,7 +642,7 @@ const particlesMesh = (() => {
         // vec3 c = mix(lineColor1, lineColor2, vPosition.y / 10.);
         vec3 c = vec3(uColor);
         float f = edgeFactor(vBarycentric, 1.);
-        gl_FragColor = vec4(c * uBeat, max(1. - f, 0.));
+        gl_FragColor = vec4(c /* * uBeat */, max(1. - f, 0.));
         // gl_FragColor = vec4(c, 1.);
       }
     `,
@@ -1590,7 +1590,7 @@ app.object.add(stacksMesh);
   }
 })();
 
-let beat = false;
+/* let beat = false;
 let beatReady = false;
 const listener = new THREE.AudioListener();
 rootScene.add(listener);
@@ -1621,7 +1621,7 @@ const _keydown = e => {
 window.addEventListener('keydown', _keydown);
 app.addEventListener('unload', () => {
   window.removeEventListener('keydown', _keydown);
-});
+}); */
 
 /* appManager.addEventListener('use', () => {
   universe.enterWorld({
@@ -1652,7 +1652,7 @@ renderer.setAnimationLoop(() => {
   particlesMesh.material.uniforms.uColor.value = f;
   particlesMesh.material.uniforms.uTime.value = (now%10000)/10000;
 
-  if (beat) {
+  /* if (beat) {
     const fd = analyser.getFrequencyData();
     const v = fd[4];
     const beatValue = Math.min(v/255, 1);
@@ -1668,7 +1668,7 @@ renderer.setAnimationLoop(() => {
     gridMesh.material.uniforms.uBeat2.value = 0;
     particlesMesh.material.uniforms.uBeat.value = 1;
     particlesMesh.material.uniforms.uBeat2.value = 0;
-  }
+  } */
   
   lastUpdateTime = now;
 });
