@@ -1283,16 +1283,9 @@ const stacksMesh = (() => {
     
     const modularMesh = await new Promise((accept, reject) => {
       gltfLoader.load(`https://webaverse.github.io/street-assets/stacks.glb`, function(object) {
-        // console.log('loaded', object);
         object = object.scene;
-        // object.scale.multiplyScalar(3);
-        // object.position.y = 2;
-        // window.object = object;
-        // scene.add( object );
-        // app.object.add(object);
 
         accept(object);
-        // render();
       }, function progress() {}, reject);
     });
     const floorMap = {
