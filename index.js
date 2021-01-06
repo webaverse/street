@@ -896,7 +896,7 @@ const stacksMesh = (() => {
         g.applyMatrix4(new THREE.Matrix4().makeTranslation(position.x, position.y, position.z));
         _mergeGeometry(g, {
           position: position.clone().add(new THREE.Vector3(0, w/2, 0)),
-          quaternion: quaternion.clone().premultiply(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(1, 0, 0), -Math.PI/4)),
+          quaternion: quaternion.clone().multiply(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(1, 0, 0), Math.PI/4)),
           scale: new THREE.Vector3(w, 0.1, Math.sqrt(2*(w**2))).divideScalar(2),
         });
       }
