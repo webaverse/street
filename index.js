@@ -769,10 +769,6 @@ const stacksMesh = (() => {
                 quaternion,
                 scale: new THREE.Vector3(w, w, 0.1).divideScalar(2),
               });
-              // for (let y = 0; y < buildingSize.y; y++) {
-                // for (let z = 0; z < buildingSize.z; z++) {
-                // }
-              // }
             }
             for (let dy = 0; dy < buildingSize.y; dy++) {
               const ax = buildingPosition.x + dx;
@@ -788,10 +784,6 @@ const stacksMesh = (() => {
                 quaternion,
                 scale: new THREE.Vector3(w, w, 0.1).divideScalar(2),
               });
-              // for (let y = 0; y < buildingSize.y; y++) {
-                // for (let z = 0; z < buildingSize.z; z++) {
-                // }
-              // }
             }
           }
           for (let dz = 0; dz < buildingSize.z; dz++) {
@@ -809,10 +801,6 @@ const stacksMesh = (() => {
                 quaternion,
                 scale: new THREE.Vector3(w, w, 0.1).divideScalar(2),
               });
-              // for (let y = 0; y < buildingSize.y; y++) {
-                // for (let z = 0; z < buildingSize.z; z++) {
-                // }
-              // }
             }
             for (let dy = 0; dy < buildingSize.y; dy++) {
               const ax = buildingPosition.x + buildingSize.x - 1;
@@ -828,10 +816,6 @@ const stacksMesh = (() => {
                 quaternion,
                 scale: new THREE.Vector3(w, w, 0.1).divideScalar(2),
               });
-              // for (let y = 0; y < buildingSize.y; y++) {
-                // for (let z = 0; z < buildingSize.z; z++) {
-                // }
-              // }
             }
           }
 
@@ -849,10 +833,6 @@ const stacksMesh = (() => {
                 quaternion: new THREE.Quaternion(),
                 scale: new THREE.Vector3(w, 0.1, w).divideScalar(2),
               });
-              // for (let y = 0; y < buildingSize.y; y++) {
-                // for (let z = 0; z < buildingSize.z; z++) {
-                // }
-              // }
             }
           }
 
