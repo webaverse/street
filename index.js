@@ -1293,6 +1293,7 @@ const stacksMesh = (() => {
     })();
     // terrainMesh.position.set(center.x, 0, center.y);
     object.add(terrainMesh);
+    const terrainPhysicsId = physics.addGeometry(terrainMesh);
   }
 
   (async () => {
