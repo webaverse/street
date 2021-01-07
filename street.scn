@@ -83,49 +83,6 @@
         0.7071067811865475
       ],
       "start_url": "https://webaverse.github.io/homespace/manifest.json"
-    },
-    {
-      "position": [
-        6,
-        0.1,
-        -4
-      ],
-      "quaternion": [
-        0,
-        0,
-        0,
-        1
-      ],
-      "start_url": "https://webaverse.github.io/party/party.url"
-    },
-    {
-      "position": [
-        8,
-        -2,
-        -5
-      ],
-      "quaternion": [
-        0,
-        -0.7071067811865475,
-        0,
-        0.7071067811865475
-      ],
-      "start_url": "https://webaverse.github.io/street-assets/station.glb",
-      "physics_url": "https://webaverse.github.io/street-assets/station.bin"
-    },
-    {
-      "position": [
-        0,
-        0,
-        0
-      ],
-      "quaternion": [
-        0,
-        0,
-        0,
-        1
-      ],
-      "start_url": "https://webaverse.github.io/stacks/index.js"
     }
   ],
   "extents": [
