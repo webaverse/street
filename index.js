@@ -65,7 +65,6 @@ class MultiSimplex {
 
 const gridSimplex = new MultiSimplex('lol', 6);
 const gridSimplex2 = new MultiSimplex('lol2', 6);
-const terrainSimplex = new MultiSimplex('lol3', 6);
 
 const streetMesh = (() => {
   const material = new THREE.ShaderMaterial({
