@@ -741,3 +741,7 @@ renderer.setAnimationLoop(() => {
   
   lastUpdateTime = now;
 });
+
+/* app.addEventListener('activate', e => {
+  console.log('got activate event', e, e.waitUntil);
+}); */
