@@ -221,7 +221,7 @@ const popoverHeight = 200;
 const popoverTarget = new THREE.Object3D();
 popoverTarget.position.set(6, 2, -4);
 const popoverTextMesh = (() => {
-  const textMesh = ui.makeTextMesh('Multiplayer hub.\n[E] to Enter', undefined, 0.5, 'center', 'middle');
+  const textMesh = ui.makeTextMesh('Multiplayer hub.\n[E] to enter', undefined, 0.5, 'center', 'middle');
   textMesh.position.z = 0.1;
   textMesh.scale.x = popoverHeight / popoverWidth;
   textMesh.color = 0xFFFFFF;
