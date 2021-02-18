@@ -709,7 +709,7 @@ app.addEventListener('unload', () => {
 }); */
 
 let lastUpdateTime = Date.now();
-renderer.setAnimationLoop(() => {
+app.addEventListener('frame', () => {
   const now = Date.now();
 
   const transforms = rig.getRigTransforms();
