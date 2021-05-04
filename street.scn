@@ -140,6 +140,11 @@
         1
       ],
       "start_url": "https://webaverse.github.io/parcels/index.js"
+    },
+    {
+      "position": [-9, 0, -1],
+      "quaternion": [0, 0.7071067811865475, 0, 0.7071067811865476],
+      "start_url": "https://avaer.github.io/chest/manifest.json"
     }
   ]
 }
