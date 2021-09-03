@@ -1,0 +1,5 @@
+{
+  "name": "street",
+  "description": "Street metaversefile",
+  "start_url": "index.js"
+}
