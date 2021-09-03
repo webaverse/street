@@ -86,20 +86,6 @@
     },
     {
       "position": [
-        6,
-        0.1,
-        -4
-      ],
-      "quaternion": [
-        0,
-        0,
-        0,
-        1
-      ],
-      "start_url": "https://webaverse.github.io/party/party.url"
-    },
-    {
-      "position": [
         8,
         -2,
         -5
