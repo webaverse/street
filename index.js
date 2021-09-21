@@ -754,6 +754,7 @@ export default () => {
   });
   
   useCleanup(() => {
+    console.log('clean up street');
     physics.removeGeometry(floorPhysicsId);
   });
 
