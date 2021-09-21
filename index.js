@@ -5,7 +5,7 @@ import * as BufferGeometryUtils from 'three/examples/jsm/utils/BufferGeometryUti
 import metaversefile from 'metaversefile';
 import Simplex from './simplex-noise.js';
 import alea from './alea.js';
-const {useFrame, useLocalPlayer, useUi, usePhysics} = metaversefile;
+const {useFrame, useLocalPlayer, useCleanup, useUi, usePhysics} = metaversefile;
 
 export default () => {  
   const parcelSize = 16;
@@ -664,7 +664,8 @@ export default () => {
   })();
   rootScene.add(particlesMesh);
 
-  const floorPhysicsId = usePhysics().addBoxGeometry(streetMesh.position, streetMesh.quaternion, new THREE.Vector3(streetSize.z, streetSize.y, streetSize.z).multiplyScalar(0.5), false);
+  const physics = usePhysics();
+  const floorPhysicsId = physics.addBoxGeometry(streetMesh.position, streetMesh.quaternion, new THREE.Vector3(streetSize.z, streetSize.y, streetSize.z).multiplyScalar(0.5), false);
   /* app.addEventListener('unload', () => {
     physics.removeGeometry(physicsId);
   }); */
@@ -750,6 +751,10 @@ export default () => {
       particlesMesh.material.uniforms.uBeat.value = 1;
       particlesMesh.material.uniforms.uBeat2.value = 0;
     } */
+  });
+  
+  useCleanup(() => {
+    physics.removeGeometry(floorPhysicsId);
   });
 
   return rootScene;
