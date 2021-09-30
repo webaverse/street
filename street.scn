@@ -82,6 +82,11 @@
         0,
         0.7071067811865475
       ],
+      "scale": [
+        2,
+        2,
+        2
+      ],
       "physics": false,
       "start_url": "https://avaer.github.io/sakura/index.glbb",
       "dynamic": true
