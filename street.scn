@@ -57,9 +57,9 @@
     },
     {
       "position": [
-        4,
+        -26,
         0,
-        2
+        -2
       ],
       "quaternion": [
         0,
@@ -67,7 +67,7 @@
         0,
         0.7071067811865475
       ],
-      "start_url": "https://webaverse.github.io/assets/male.vrm",
+      "start_url": "/avatars/scillia.vrm",
       "dynamic": true
     },
     {
