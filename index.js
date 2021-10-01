@@ -666,9 +666,9 @@ export default () => {
 
   const physics = usePhysics();
   const floorPhysicsId = physics.addBoxGeometry(
-    new THREE.Vector3(0, -100, 0),
+    new THREE.Vector3(0, -1000, 0),
     streetMesh.quaternion,
-    new THREE.Vector3(streetSize.z, 200, streetSize.z).multiplyScalar(0.5),
+    new THREE.Vector3(streetSize.z, 2000, streetSize.z).multiplyScalar(0.5),
     false
   );
   /* app.addEventListener('unload', () => {
