@@ -665,7 +665,13 @@ export default () => {
   rootScene.add(particlesMesh);
 
   const physics = usePhysics();
-  const floorPhysicsId = physics.addBoxGeometry(streetMesh.position, streetMesh.quaternion, new THREE.Vector3(streetSize.z, streetSize.y, streetSize.z).multiplyScalar(0.5), false);
+  const floorPhysicsId = physics.addBoxGeometry(
+    streetMesh.position.clone()
+      .add(new THREE.Vector3(0, -100, 0)),
+    streetMesh.quaternion,
+    new THREE.Vector3(streetSize.z, 200, streetSize.z).multiplyScalar(0.5),
+    false
+  );
   /* app.addEventListener('unload', () => {
     physics.removeGeometry(physicsId);
   }); */
