@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import {GLTFLoader} from 'three/examples/jsm/loaders/GLTFLoader.js';
+// import {GLTFLoader} from 'three/examples/jsm/loaders/GLTFLoader.js';
 import * as BufferGeometryUtils from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 // import {renderer, camera, runtime, world, universe, physics, ui, rig, app, appManager, popovers} from 'app';
 import metaversefile from 'metaversefile';
@@ -33,8 +33,8 @@ export default () => {
   const localQuaternion = new THREE.Quaternion();
   const localEuler = new THREE.Euler();
   const localMatrix = new THREE.Matrix4();
-  const gltfLoader = new GLTFLoader();
-  const textureLoader = new THREE.TextureLoader();
+  // const gltfLoader = new GLTFLoader();
+  // const textureLoader = new THREE.TextureLoader();
 
   const rootScene = new THREE.Object3D();
   // app.object.add(rootScene);
