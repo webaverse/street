@@ -486,7 +486,12 @@ export default () => {
           f = min(f, mod(1.-p.x, 1.));
           f = min(f, mod(1.-p.z, 1.));
           f *= 10.;
-          gl_FragColor = vec4(c /* * uBeat */, /*0.7 + */max(1. - f, 0.));
+          float a = /*0.7 + */max(1. - f, 0.);
+          if (a < 0.5) {
+            discard;
+          } else {
+            gl_FragColor = vec4(c /* * uBeat */, a);
+          }
         }
       `,
       side: THREE.DoubleSide,
