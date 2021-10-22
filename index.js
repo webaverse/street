@@ -5,7 +5,7 @@ import * as BufferGeometryUtils from 'three/examples/jsm/utils/BufferGeometryUti
 import metaversefile from 'metaversefile';
 import Simplex from './simplex-noise.js';
 import alea from './alea.js';
-const {useFrame, useLocalPlayer, useCleanup, useUi, usePhysics} = metaversefile;
+const {useFrame, useLocalPlayer, useCleanup, /*useUi,*/ usePhysics} = metaversefile;
 
 export default () => {  
   const parcelSize = 16;
@@ -217,7 +217,7 @@ export default () => {
   streetMesh.position.set(0, -1/2, 0);
   rootScene.add(streetMesh);
 
-  const ui = useUi();
+  /* const ui = useUi();
   const w = 4;
   const popoverWidth = 600; // XXX
   const popoverHeight = 200;
@@ -234,7 +234,7 @@ export default () => {
     width: popoverWidth,
     height: popoverHeight,
     target: popoverTarget,
-  });
+  }); */
 
   /* function mod(a, n) {
     return ((a%n)+n)%n;
