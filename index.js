@@ -206,6 +206,7 @@ export default () => {
           float section = floor(vPosition.z/10.);
           float f = pattern(p, section);
           gl_FragColor = vec4(c * (f > 0.5 ? 1. : 0.2) /* * uBeat */, 1.);
+          gl_FragColor = sRGBToLinear(gl_FragColor);
         }
       `,
       side: THREE.DoubleSide,
@@ -491,6 +492,7 @@ export default () => {
             discard;
           } else {
             gl_FragColor = vec4(c /* * uBeat */, a);
+            gl_FragColor = sRGBToLinear(gl_FragColor);
           }
         }
       `,
