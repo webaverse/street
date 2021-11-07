@@ -4,6 +4,7 @@ import * as BufferGeometryUtils from 'three/examples/jsm/utils/BufferGeometryUti
 // import {renderer, camera, runtime, world, universe, physics, ui, rig, app, appManager, popovers} from 'app';
 import metaversefile from 'metaversefile';
 import Simplex from './simplex-noise.js';
+import { logdepthbuf_fragmentGlsl, logdepthbuf_pars_fragmentGlsl, logdepthbuf_vertexGlsl, logdepthbuf_pars_vertexGlsl } from './logdepthbuf/index.js';
 import alea from './alea.js';
 const {useFrame, useLocalPlayer, useCleanup, /*useUi,*/ usePhysics} = metaversefile;
 
@@ -84,6 +85,8 @@ export default () => {
       vertexShader: `\
         #define PI 3.1415926535897932384626433832795
 
+        ${logdepthbuf_pars_vertexGlsl}
+
         attribute float y;
         attribute vec3 barycentric;
         varying float vUv;
@@ -94,6 +97,8 @@ export default () => {
           vBarycentric = barycentric;
           vPosition = position;
           gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+
+          ${logdepthbuf_vertexGlsl}
         }
       `,
       fragmentShader: `\
@@ -101,6 +106,8 @@ export default () => {
         varying vec3 vBarycentric;
         varying vec3 vPosition;
         uniform float uTime;
+
+        ${logdepthbuf_pars_fragmentGlsl}
 
         struct C{
             float d;
@@ -207,6 +214,8 @@ export default () => {
           float f = pattern(p, section);
           gl_FragColor = vec4(c * (f > 0.5 ? 1. : 0.2) /* * uBeat */, 1.);
           gl_FragColor = sRGBToLinear(gl_FragColor);
+
+          ${logdepthbuf_fragmentGlsl}
         }
       `,
       side: THREE.DoubleSide,
@@ -452,11 +461,15 @@ export default () => {
         varying vec3 vBarycentric;
         varying vec3 vPosition;
 
+        ${logdepthbuf_pars_vertexGlsl}
+
         void main() {
           vUv = uv.x;
           vBarycentric = barycentric;
           vPosition = position;
           gl_Position = projectionMatrix * modelViewMatrix * vec4(position /* + vec3(0., dynamicPositionY * uBeat2, 0.) */, 1.0);
+
+          ${logdepthbuf_vertexGlsl}
         }
       `,
       fragmentShader: `\
@@ -464,6 +477,7 @@ export default () => {
         precision highp float;
         precision highp int;
 
+        ${logdepthbuf_pars_fragmentGlsl}
         #define PI 3.1415926535897932384626433832795
 
         varying vec3 vBarycentric;
@@ -494,6 +508,7 @@ export default () => {
             gl_FragColor = vec4(c /* * uBeat */, a);
             gl_FragColor = sRGBToLinear(gl_FragColor);
           }
+          ${logdepthbuf_fragmentGlsl}
         }
       `,
       side: THREE.DoubleSide,
@@ -589,7 +604,7 @@ export default () => {
       },
       vertexShader: `\
         #define PI 3.1415926535897932384626433832795
-
+        ${logdepthbuf_pars_vertexGlsl}
         vec3 applyQuaternion(vec3 v, vec4 q) { 
           return v + 2.0*cross(cross(v, q.xyz ) + q.w*v, q.xyz);
         }
@@ -631,6 +646,8 @@ export default () => {
           o -= ${(spread/2).toFixed(8)};
           o += cameraPosition;
           gl_Position = projectionMatrix * modelViewMatrix * vec4(applyAxisAngle(p, dynamicRotation, uTime * PI*2.) + o, 1.0);
+
+          ${logdepthbuf_vertexGlsl}
         }
       `,
       fragmentShader: `\
@@ -639,6 +656,8 @@ export default () => {
 
         #define PI 3.1415926535897932384626433832795
 
+        ${logdepthbuf_pars_fragmentGlsl}
+        
         uniform float uColor;
         // uniform float uBeat;
         varying vec3 vBarycentric;
@@ -660,6 +679,8 @@ export default () => {
           float f = edgeFactor(vBarycentric, 1.);
           gl_FragColor = vec4(c /* * uBeat */, max(1. - f, 0.));
           // gl_FragColor = vec4(c, 1.);
+
+          ${logdepthbuf_fragmentGlsl}
         }
       `,
       side: THREE.DoubleSide,
