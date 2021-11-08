@@ -4,7 +4,7 @@ import * as BufferGeometryUtils from 'three/examples/jsm/utils/BufferGeometryUti
 // import {renderer, camera, runtime, world, universe, physics, ui, rig, app, appManager, popovers} from 'app';
 import metaversefile from 'metaversefile';
 import Simplex from './simplex-noise.js';
-import { logdepthbuf_fragmentGlsl, logdepthbuf_pars_fragmentGlsl, logdepthbuf_vertexGlsl, logdepthbuf_pars_vertexGlsl } from './logdepthbuf/index';
+import { logdepthbuf_fragmentGlsl, logdepthbuf_pars_fragmentGlsl, logdepthbuf_vertexGlsl, logdepthbuf_pars_vertexGlsl } from './logdepthbuf/index.js';
 import alea from './alea.js';
 const {useFrame, useLocalPlayer, useCleanup, /*useUi,*/ usePhysics} = metaversefile;
 
