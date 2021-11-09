@@ -4,7 +4,6 @@ import * as BufferGeometryUtils from 'three/examples/jsm/utils/BufferGeometryUti
 // import {renderer, camera, runtime, world, universe, physics, ui, rig, app, appManager, popovers} from 'app';
 import metaversefile from 'metaversefile';
 import Simplex from './simplex-noise.js';
-import { logdepthbuf_fragmentGlsl, logdepthbuf_pars_fragmentGlsl, logdepthbuf_vertexGlsl, logdepthbuf_pars_vertexGlsl } from './logdepthbuf/index.js';
 import alea from './alea.js';
 const {useFrame, useLocalPlayer, useCleanup, /*useUi,*/ usePhysics} = metaversefile;
 
@@ -85,15 +84,7 @@ export default () => {
       vertexShader: `\
         #define PI 3.1415926535897932384626433832795
 
-        #ifdef USE_LOGDEPTHBUF
-        #define EPSILON 1e-6
-        #ifdef USE_LOGDEPTHBUF_EXT
-        varying float vFragDepth;
-        #endif
-        uniform float logDepthBufFC;
-        #endif
-
-
+        ${THREE.ShaderChunk.logdepthbuf_pars_vertex}
         attribute float y;
         attribute vec3 barycentric;
         varying float vUv;
@@ -104,15 +95,7 @@ export default () => {
           vBarycentric = barycentric;
           vPosition = position;
           gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-
-          #ifdef USE_LOGDEPTHBUF
-            gl_Position.z = log2(max( EPSILON, gl_Position.w + 1.0 )) * logDepthBufFC;
-          #ifdef USE_LOGDEPTHBUF_EXT
-            vFragDepth = 1.0 + gl_Position.w;
-          #else
-            gl_Position.z = (gl_Position.z - 1.0) * gl_Position.w;
-          #endif
-          #endif
+          ${THREE.ShaderChunk.logdepthbuf_vertex}
         }
       `,
       fragmentShader: `\
@@ -120,14 +103,7 @@ export default () => {
         varying vec3 vBarycentric;
         varying vec3 vPosition;
         uniform float uTime;
-
-        #ifdef USE_LOGDEPTHBUF
-        uniform float logDepthBufFC;
-        #ifdef USE_LOGDEPTHBUF_EXT
-        #extension GL_EXT_frag_depth : enable
-        varying float vFragDepth;
-        #endif
-        #endif
+        ${THREE.ShaderChunk.logdepthbuf_pars_fragment}
 
         struct C{
             float d;
@@ -235,9 +211,7 @@ export default () => {
           gl_FragColor = vec4(c * (f > 0.5 ? 1. : 0.2) /* * uBeat */, 1.);
           gl_FragColor = sRGBToLinear(gl_FragColor);
 
-          #if defined(USE_LOGDEPTHBUF) && defined(USE_LOGDEPTHBUF_EXT)
-            gl_FragDepthEXT = log2(vFragDepth) * logDepthBufFC * 0.5;
-          #endif
+          ${THREE.ShaderChunk.logdepthbuf_fragment}
         }
       `,
       side: THREE.DoubleSide,
@@ -482,14 +456,7 @@ export default () => {
         varying float vUv;
         varying vec3 vBarycentric;
         varying vec3 vPosition;
-
-        #ifdef USE_LOGDEPTHBUF
-        #define EPSILON 1e-6
-        #ifdef USE_LOGDEPTHBUF_EXT
-        varying float vFragDepth;
-        #endif
-        uniform float logDepthBufFC;
-        #endif
+        ${THREE.ShaderChunk.logdepthbuf_pars_vertex}
 
         void main() {
           vUv = uv.x;
@@ -497,14 +464,7 @@ export default () => {
           vPosition = position;
           gl_Position = projectionMatrix * modelViewMatrix * vec4(position /* + vec3(0., dynamicPositionY * uBeat2, 0.) */, 1.0);
 
-          #ifdef USE_LOGDEPTHBUF
-            gl_Position.z = log2(max( EPSILON, gl_Position.w + 1.0 )) * logDepthBufFC;
-          #ifdef USE_LOGDEPTHBUF_EXT
-            vFragDepth = 1.0 + gl_Position.w;
-          #else
-            gl_Position.z = (gl_Position.z - 1.0) * gl_Position.w;
-          #endif
-          #endif
+          ${THREE.ShaderChunk.logdepthbuf_vertex}
         }
       `,
       fragmentShader: `\
@@ -512,13 +472,6 @@ export default () => {
         precision highp float;
         precision highp int;
 
-        #ifdef USE_LOGDEPTHBUF
-        uniform float logDepthBufFC;
-        #ifdef USE_LOGDEPTHBUF_EXT
-        #extension GL_EXT_frag_depth : enable
-        varying float vFragDepth;
-        #endif
-        #endif
         #define PI 3.1415926535897932384626433832795
 
         varying vec3 vBarycentric;
@@ -526,6 +479,8 @@ export default () => {
 
         const vec3 lineColor1 = vec3(${new THREE.Color(0x66bb6a).toArray().join(', ')});
         const vec3 lineColor2 = vec3(${new THREE.Color(0x9575cd).toArray().join(', ')});
+
+        ${THREE.ShaderChunk.logdepthbuf_pars_fragment}
 
         float edgeFactor(vec3 bary, float width) {
           // vec3 bary = vec3(vBC.x, vBC.y, 1.0 - vBC.x - vBC.y);
@@ -549,9 +504,8 @@ export default () => {
             gl_FragColor = vec4(c /* * uBeat */, a);
             gl_FragColor = sRGBToLinear(gl_FragColor);
           }
-          #if defined(USE_LOGDEPTHBUF) && defined(USE_LOGDEPTHBUF_EXT)
-            gl_FragDepthEXT = log2(vFragDepth) * logDepthBufFC * 0.5;
-          #endif
+
+          ${THREE.ShaderChunk.logdepthbuf_fragment}
         }
       `,
       side: THREE.DoubleSide,
@@ -648,13 +602,7 @@ export default () => {
       vertexShader: `\
         #define PI 3.1415926535897932384626433832795
 
-        #ifdef USE_LOGDEPTHBUF
-        #define EPSILON 1e-6
-        #ifdef USE_LOGDEPTHBUF_EXT
-        varying float vFragDepth;
-        #endif
-        uniform float logDepthBufFC;
-        #endif
+        ${THREE.ShaderChunk.logdepthbuf_pars_vertex}
 
         vec3 applyQuaternion(vec3 v, vec4 q) { 
           return v + 2.0*cross(cross(v, q.xyz ) + q.w*v, q.xyz);
@@ -698,14 +646,7 @@ export default () => {
           o += cameraPosition;
           gl_Position = projectionMatrix * modelViewMatrix * vec4(applyAxisAngle(p, dynamicRotation, uTime * PI*2.) + o, 1.0);
 
-          #ifdef USE_LOGDEPTHBUF
-          gl_Position.z = log2(max( EPSILON, gl_Position.w + 1.0 )) * logDepthBufFC;
-          #ifdef USE_LOGDEPTHBUF_EXT
-              vFragDepth = 1.0 + gl_Position.w;
-          #else
-              gl_Position.z = (gl_Position.z - 1.0) * gl_Position.w;
-          #endif
-          #endif
+          ${THREE.ShaderChunk.logdepthbuf_vertex}
         }
       `,
       fragmentShader: `\
@@ -713,15 +654,9 @@ export default () => {
         precision highp int;
 
         #define PI 3.1415926535897932384626433832795
-
-        #ifdef USE_LOGDEPTHBUF
-        uniform float logDepthBufFC;
-        #ifdef USE_LOGDEPTHBUF_EXT
-        #extension GL_EXT_frag_depth : enable
-        varying float vFragDepth;
-        #endif
-        #endif
         
+        ${THREE.ShaderChunk.logdepthbuf_pars_fragment}
+
         uniform float uColor;
         // uniform float uBeat;
         varying vec3 vBarycentric;
@@ -744,9 +679,7 @@ export default () => {
           gl_FragColor = vec4(c /* * uBeat */, max(1. - f, 0.));
           // gl_FragColor = vec4(c, 1.);
 
-          #if defined(USE_LOGDEPTHBUF) && defined(USE_LOGDEPTHBUF_EXT)
-            gl_FragDepthEXT = log2(vFragDepth) * logDepthBufFC * 0.5;
-          #endif
+          ${THREE.ShaderChunk.logdepthbuf_fragment}
         }
       `,
       side: THREE.DoubleSide,
