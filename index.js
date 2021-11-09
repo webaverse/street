@@ -600,7 +600,7 @@ export default () => {
       },
       vertexShader: `\
           
-      ${THREE.ShaderChunk.common}
+        ${THREE.ShaderChunk.common}
 
         ${THREE.ShaderChunk.logdepthbuf_pars_vertex}
 
