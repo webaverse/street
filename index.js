@@ -68,7 +68,6 @@ export default () => {
 
   const gridSimplex = new MultiSimplex('lol', 6);
   const gridSimplex2 = new MultiSimplex('lol2', 6);
-  debugger;
   const streetMesh = (() => {
     const material = new THREE.ShaderMaterial({
       uniforms: {
