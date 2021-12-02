@@ -2,10 +2,10 @@ import * as THREE from 'three';
 // import {GLTFLoader} from 'three/examples/jsm/loaders/GLTFLoader.js';
 import * as BufferGeometryUtils from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 // import {renderer, camera, runtime, world, universe, physics, ui, rig, app, appManager, popovers} from 'app';
-import metaversefile from 'metaversefile';
+import totum from 'totum';
 import Simplex from './simplex-noise.js';
 import alea from './alea.js';
-const {useFrame, useLocalPlayer, useCleanup, /*useUi,*/ usePhysics} = metaversefile;
+const {useFrame, useLocalPlayer, useCleanup, /*useUi,*/ usePhysics} = totum;
 
 export default () => {  
   const parcelSize = 16;
