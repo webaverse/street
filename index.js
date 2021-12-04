@@ -226,7 +226,8 @@ export default () => {
   // mt.
   rootScene.add(streetMesh);
   streetMesh.position.set(0, -1/2, 0);
-  streetMesh.matrixWorldNeedsUpdate=true;
+  // streetMesh.matrixWorldNeedsUpdate=true;
+  streetMesh.updateMatrixWorld();
   /* const ui = useUi();
   const w = 4;
   const popoverWidth = 600; // XXX
@@ -522,7 +523,8 @@ export default () => {
 
   rootScene.add(gridMesh);
   gridMesh.position.set(0, -0.01, 0);
-  gridMesh.matrixWorldNeedsUpdate=true;
+  // gridMesh.matrixWorldNeedsUpdate=true;
+  gridMesh.updateMatrixWorld();
   const particlesMesh = (() => {
     const numParticles = 30000;
     const s = 0.1;
