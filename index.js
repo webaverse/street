@@ -5,6 +5,7 @@ import * as BufferGeometryUtils from 'three/examples/jsm/utils/BufferGeometryUti
 import metaversefile from 'metaversefile';
 import Simplex from './simplex-noise.js';
 import alea from './alea.js';
+import { Matrix3, Matrix4 } from 'three';
 const {useFrame, useLocalPlayer, useCleanup, /*useUi,*/ usePhysics} = metaversefile;
 
 export default () => {  
@@ -219,9 +220,13 @@ export default () => {
     const mesh = new THREE.Mesh(geometry, material);
     return mesh;
   })();
-  streetMesh.position.set(0, 23, 0);
-  rootScene.add(streetMesh);
 
+  // var vec = new THREE.Vector3(0,23,0);
+  // var mt = new Matrix3(vec.);
+  // mt.
+  rootScene.add(streetMesh);
+  streetMesh.position.set(0, -1/2, 0);
+  streetMesh.matrixWorldNeedsUpdate=true;
   /* const ui = useUi();
   const w = 4;
   const popoverWidth = 600; // XXX
@@ -513,9 +518,11 @@ export default () => {
     const mesh = new THREE.Mesh(geometry, material);
     return mesh;
   })();
-  // gridMesh.position.set(0, -0.01, 0);
-  rootScene.add(gridMesh);
 
+
+  rootScene.add(gridMesh);
+  gridMesh.position.set(0, -0.01, 0);
+  gridMesh.matrixWorldNeedsUpdate=true;
   const particlesMesh = (() => {
     const numParticles = 30000;
     const s = 0.1;
