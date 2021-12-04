@@ -219,7 +219,7 @@ export default () => {
     const mesh = new THREE.Mesh(geometry, material);
     return mesh;
   })();
-  streetMesh.position.set(0, -1/2, 0);
+  streetMesh.position.set(0, 23, 0);
   rootScene.add(streetMesh);
 
   /* const ui = useUi();
