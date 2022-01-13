@@ -1,13 +1,15 @@
 import * as THREE from 'three';
 // import {GLTFLoader} from 'three/examples/jsm/loaders/GLTFLoader.js';
-import * as BufferGeometryUtils from 'three/examples/jsm/utils/BufferGeometryUtils.js';
+// import * as BufferGeometryUtils from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 // import {renderer, camera, runtime, world, universe, physics, ui, rig, app, appManager, popovers} from 'app';
 import metaversefile from 'metaversefile';
 import Simplex from './simplex-noise.js';
-import alea from './alea.js';
-const {useFrame, useLocalPlayer, useCleanup, /*useUi,*/ usePhysics} = metaversefile;
+// import alea from './alea.js';
+const {useFrame, useLocalPlayer, useCleanup, useMaterials, usePhysics} = metaversefile;
 
-export default () => {  
+export default () => {
+  const {WebaverseShaderMaterial} = useMaterials();
+
   const parcelSize = 16;
   const width = 10;
   const height = 10;
@@ -69,7 +71,7 @@ export default () => {
   const gridSimplex = new MultiSimplex('lol', 6);
   const gridSimplex2 = new MultiSimplex('lol2', 6);
   const streetMesh = (() => {
-    const material = new THREE.ShaderMaterial({
+    const material = new WebaverseShaderMaterial({
       uniforms: {
         uTime: {
           type: 'f',
@@ -81,9 +83,6 @@ export default () => {
         }, */
       },
       vertexShader: `\
-        ${THREE.ShaderChunk.common}
-
-        ${THREE.ShaderChunk.logdepthbuf_pars_vertex}
         attribute float y;
         attribute vec3 barycentric;
         varying float vUv;
@@ -94,7 +93,6 @@ export default () => {
           vBarycentric = barycentric;
           vPosition = position;
           gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-          ${THREE.ShaderChunk.logdepthbuf_vertex}
         }
       `,
       fragmentShader: `\
@@ -102,7 +100,6 @@ export default () => {
         varying vec3 vBarycentric;
         varying vec3 vPosition;
         uniform float uTime;
-        ${THREE.ShaderChunk.logdepthbuf_pars_fragment}
 
         struct C{
             float d;
@@ -209,8 +206,6 @@ export default () => {
           float f = pattern(p, section);
           gl_FragColor = vec4(c * (f > 0.5 ? 1. : 0.2) /* * uBeat */, 1.);
           gl_FragColor = sRGBToLinear(gl_FragColor);
-
-          ${THREE.ShaderChunk.logdepthbuf_fragment}
         }
       `,
       side: THREE.DoubleSide,
