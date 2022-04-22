@@ -359,6 +359,10 @@ export default () => {
       `,
       side: THREE.DoubleSide,
       transparent: true,
+
+      clipping: false,
+      fog: false,
+      lights: false,
     });
     const mesh = new THREE.Mesh(geometry, material);
     return mesh;
