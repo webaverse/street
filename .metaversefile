@@ -4,8 +4,8 @@
   "start_url": "index.js",
   "components": [
     {
-      "key": "canGetHurt",
-      "value": false
+      "key": "vincibility",
+      "value": "invincible"
     }
   ]
 }
