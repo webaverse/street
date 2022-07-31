@@ -351,7 +351,6 @@ export default () => {
             discard;
           } else {
             gl_FragColor = vec4(c /* * uBeat */, a);
-            gl_FragColor = sRGBToLinear(gl_FragColor);
           }
 
           ${THREE.ShaderChunk.logdepthbuf_fragment}
