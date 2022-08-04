@@ -179,10 +179,15 @@ export default () => {
       varying float vTypex;
       varying float vTypez;
       varying float vDepth;
+      
+      vec4 sRGBToLinear( in vec4 value ) {
+	      return vec4( mix( pow( value.rgb * 0.9478672986 + vec3( 0.0521327014 ), vec3( 2.4 ) ), value.rgb * 0.0773993808, vec3( lessThanEqual( value.rgb, vec3( 0.04045 ) ) ) ), value.a );
+      }
       void main() {
         vec3 c = vec3(${new THREE.Color(0xCCCCCC).toArray().join(', ')});
         float a = (1.0-vDepth)*0.5;
         gl_FragColor = vec4(c, a);
+        gl_FragColor = sRGBToLinear(gl_FragColor);
       }
     `;
     const material = new THREE.ShaderMaterial({
@@ -351,7 +356,6 @@ export default () => {
             discard;
           } else {
             gl_FragColor = vec4(c /* * uBeat */, a);
-            gl_FragColor = sRGBToLinear(gl_FragColor);
           }
 
           ${THREE.ShaderChunk.logdepthbuf_fragment}
