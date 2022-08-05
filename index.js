@@ -338,6 +338,10 @@ export default () => {
           return min(min(a3.x, a3.y), a3.z);
         }
 
+        vec4 sRGBToLinear( in vec4 value ) {
+          return vec4( mix( pow( value.rgb * 0.9478672986 + vec3( 0.0521327014 ), vec3( 2.4 ) ), value.rgb * 0.0773993808, vec3( lessThanEqual( value.rgb, vec3( 0.04045 ) ) ) ), value.a );
+        }
+
         void main() {
           vec3 c = mix(lineColor1, lineColor2, vPosition.y / 10.);
           // vec3 p = fwidth(vPosition);
