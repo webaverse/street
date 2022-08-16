@@ -359,6 +359,9 @@ export default () => {
           }
 
           ${THREE.ShaderChunk.logdepthbuf_fragment}
+
+          #include <tonemapping_fragment>
+			    #include <encodings_fragment>
         }
       `,
       side: THREE.DoubleSide,
@@ -460,10 +463,7 @@ export default () => {
         },
       },
       vertexShader: `\
-          
-        ${THREE.ShaderChunk.common}
-
-        ${THREE.ShaderChunk.logdepthbuf_pars_vertex}
+        #define PI 3.1415926535897932384626433832795
 
         vec3 applyQuaternion(vec3 v, vec4 q) { 
           return v + 2.0*cross(cross(v, q.xyz ) + q.w*v, q.xyz);
@@ -506,8 +506,6 @@ export default () => {
           o -= ${(spread/2).toFixed(8)};
           o += cameraPosition;
           gl_Position = projectionMatrix * modelViewMatrix * vec4(applyAxisAngle(p, dynamicRotation, uTime * PI*2.) + o, 1.0);
-
-          ${THREE.ShaderChunk.logdepthbuf_vertex}
         }
       `,
       fragmentShader: `\
@@ -516,8 +514,6 @@ export default () => {
 
         #define PI 3.1415926535897932384626433832795
         
-        ${THREE.ShaderChunk.logdepthbuf_pars_fragment}
-
         uniform float uColor;
         // uniform float uBeat;
         varying vec3 vBarycentric;
@@ -540,7 +536,8 @@ export default () => {
           gl_FragColor = vec4(c /* * uBeat */, max(1. - f, 0.));
           // gl_FragColor = vec4(c, 1.);
 
-          ${THREE.ShaderChunk.logdepthbuf_fragment}
+          #include <tonemapping_fragment>
+			    #include <encodings_fragment>
         }
       `,
       side: THREE.DoubleSide,
