@@ -296,8 +296,6 @@ export default () => {
         }, */
       },
       vertexShader: `\
-         ${THREE.ShaderChunk.common}
-
         attribute float y;
         attribute vec3 barycentric;
         // attribute float dynamicPositionY;
@@ -305,15 +303,12 @@ export default () => {
         varying float vUv;
         varying vec3 vBarycentric;
         varying vec3 vPosition;
-        ${THREE.ShaderChunk.logdepthbuf_pars_vertex}
 
         void main() {
           vUv = uv.x;
           vBarycentric = barycentric;
           vPosition = position;
           gl_Position = projectionMatrix * modelViewMatrix * vec4(position /* + vec3(0., dynamicPositionY * uBeat2, 0.) */, 1.0);
-
-          ${THREE.ShaderChunk.logdepthbuf_vertex}
         }
       `,
       fragmentShader: `\
@@ -328,8 +323,6 @@ export default () => {
 
         const vec3 lineColor1 = vec3(${new THREE.Color(0x66bb6a).toArray().join(', ')});
         const vec3 lineColor2 = vec3(${new THREE.Color(0x9575cd).toArray().join(', ')});
-
-        ${THREE.ShaderChunk.logdepthbuf_pars_fragment}
 
         float edgeFactor(vec3 bary, float width) {
           // vec3 bary = vec3(vBC.x, vBC.y, 1.0 - vBC.x - vBC.y);
@@ -357,8 +350,6 @@ export default () => {
             gl_FragColor = vec4(c /* * uBeat */, a);
             gl_FragColor = sRGBToLinear(gl_FragColor);
           }
-
-          ${THREE.ShaderChunk.logdepthbuf_fragment}
 
           #include <tonemapping_fragment>
 			    #include <encodings_fragment>
