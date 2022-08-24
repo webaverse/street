@@ -5,7 +5,7 @@ import * as THREE from 'three';
 import metaversefile from 'metaversefile';
 import Simplex from './simplex-noise.js';
 // import alea from './alea.js';
-const {useFrame, useLocalPlayer, useCleanup, useMaterials, usePhysics} = metaversefile;
+const {useFrame, useLocalPlayer, useCleanup, useMaterials, usePhysics,useApp} = metaversefile;
 
 export default () => {
   // const {WebaverseShaderMaterial} = useMaterials();
@@ -646,6 +646,7 @@ export default () => {
     // console.log('clean up street');
     physics.removeGeometry(floorPhysicsId);
   });
-
+  const app = useApp();
+  app.setComponent('vincibility','invincible');
   return rootScene;
 }
